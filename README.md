@@ -17,7 +17,7 @@ La partida y los logros se guardan automáticamente en el navegador.
 |---|---|
 | **Estadísticas** | Felicidad, salud, inteligencia, apariencia, estrés, fama y karma. El estrés alto enferma; la salud tiende a bajar con la edad. |
 | **Educación** | Primaria, secundaria con notas y clubes, examen de admisión, universidad pública o privada, becas, préstamos estudiantiles, 19 carreras, maestría/MBA, doctorado, residencia médica y escuela de aviación. |
-| **Trabajo** | 38 profesiones con requisitos reales, entrevistas, desempeño, ascensos, aumentos, horas extra, despidos (también por recesión), medio tiempo para adolescentes, jubilación y pensión. |
+| **Trabajo** | 39 profesiones con requisitos reales, entrevistas, desempeño, ascensos, aumentos, horas extra, despidos (también por recesión), medio tiempo para adolescentes, jubilación y pensión. |
 | **Carreras especiales** | Modelaje (castings: interpreta el brief), actuación (audiciones), dirección de cine (guion, presupuesto, elenco, marketing, tendencias, taquilla y la Estatuilla Dorada), política (campaña, debate, mandatos, leyes, corrupción), astronauta (tres pruebas y misiones), MMA (combate por turnos), redes sociales/influencer. |
 | **Dinero** | Impuestos progresivos por país, gastos según estilo de vida y vivienda, hipotecas, préstamos, quiebra, inversiones (índice, acciones, bonos, cripto), bienes raíces (alquilar, remodelar), autos, lujos, donaciones. |
 | **Negocios** | 10 sectores, capital, empleados, calidad, marketing, reinversión, rondas de inversión, salida a bolsa y venta. |
