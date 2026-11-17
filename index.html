@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<title>Otra Vida</title>
+<meta name="description" content="Simulador de vida en español: estudia, trabaja, ama, emprende, delinque y deja un legado.">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<div id="app" class="oculto">
+  <header id="cabecera">
+    <div id="avatar">👶</div>
+    <div id="identidad">
+      <div id="nombre-jugador">—</div>
+      <div id="sub-jugador">—</div>
+    </div>
+    <div id="dinero-jugador">$0</div>
+    <button id="btn-menu" class="icono" aria-label="Menú">☰</button>
+  </header>
+  <div id="barra-objetivo"></div>
+  <main id="registro" aria-live="polite"></main>
+  <section id="stats"></section>
+  <nav id="nav">
+    <button data-nav="ocupacion"><span>🎓</span><small id="nav-ocupacion">Escuela</small></button>
+    <button data-nav="bienes"><span>🏠</span><small>Bienes</small></button>
+    <button data-nav="edad" id="btn-edad"><span>＋</span><small>Edad</small></button>
+    <button data-nav="relaciones"><span>❤️</span><small>Relaciones</small></button>
+    <button data-nav="actividades"><span>🎯</span><small>Actividades</small></button>
+  </nav>
+</div>
+
+<div id="inicio" class="pantalla"></div>
+<div id="panel" class="oculto"></div>
+<div id="modal-fondo" class="oculto"><div id="modal" role="dialog" aria-modal="true"></div></div>
+<div id="minijuego" class="oculto"></div>
+<div id="toast"></div>
+
+<script src="js/util.js"></script>
+<script src="js/datos.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/estado.js"></script>
+<script src="js/educacion.js"></script>
+<script src="js/trabajo.js"></script>
+<script src="js/carreras.js"></script>
+<script src="js/cine.js"></script>
+<script src="js/politica.js"></script>
+<script src="js/finanzas.js"></script>
+<script src="js/relaciones.js"></script>
+<script src="js/salud.js"></script>
+<script src="js/crimen.js"></script>
+<script src="js/minijuegos.js"></script>
+<script src="js/realeza.js"></script>
+<script src="js/eventos.js"></script>
+<script src="js/objetivos.js"></script>
+<script src="js/actividades.js"></script>
+<script src="js/vida.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
