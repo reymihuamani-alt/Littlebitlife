@@ -46,6 +46,7 @@ const Relaciones = {
       const p = S.p;
       if (!r.vivo) return [{ info: `${r.nombre} falleció.` }];
       const its = [{ kv: [['Relación', etiquetaRel(r)], ['Edad', r.edad], ['Profesión', r.edad < 18 ? 'Estudiante' : r.profesion || '—'], ['Dinero', r.edad >= 18 ? fmt$(r.dinero) : '—']] }, { barra: ['Cercanía', r.cercania] }];
+      if (r.tipo === 'amigo' && r.chispa > 0 && this.puedeRomance(r)) its.push({ barra: ['💗 Chispa', r.chispa, '#e8508a'] });
       const a = (ic, t, fn, s, dis) => its.push({ ic, t, s, fn, dis });
       const accion = (clave, max, fn) => () => { if (!usar(clave + r.id, max)) return; fn(); };
       if (p.carcel) { a('📞', 'Llamar desde prisión', accion('llamar', 1, () => { r.cercania = clamp(r.cercania + R.int(2, 8)); log(`Llamaste a ${r.nombre} desde prisión.`); })); return its; }
@@ -60,7 +61,10 @@ const Relaciones = {
       }
       if (r.tipo === 'hijo' && r.edad >= 18) a('💸', 'Darle dinero', () => Modal.numero({ titulo: `Darle dinero a ${r.nombre}`, max: Math.max(0, p.dinero), valor: Math.max(0, p.dinero * 0.05), fn: v => { p.dinero -= v; r.dinero += v; r.cercania = clamp(r.cercania + Math.min(20, Math.round(v / (2000 * eco())))); log(`Le diste ${fmt$(v)} a ${r.nombre}.`); } }));
       if (['padre', 'madre'].includes(r.tipo) && r.edad >= 70) a('🫶', 'Cuidar de tu ' + etiquetaRel(r).toLowerCase(), accion('cuidar', 1, () => { r.cercania = clamp(r.cercania + 8); mod({ karma: 3, estres: 3 }); log(`Cuidaste de ${r.nombre} en su vejez.`, 'bueno'); }));
-      if (r.tipo === 'amigo' && p.edad >= 16) a('😏', 'Coquetear', accion('coquetear', 1, () => { if (R.chance(r.cercania / 140 + (p.st.apariencia - r.apa) / 200)) { r.tipo = 'pareja'; r.anios = 0; p.cont.parejas++; log(`💕 ¡Tú y ${r.nombre} ahora son pareja!`, 'bueno'); mod({ felicidad: 10 }); } else { r.cercania = clamp(r.cercania - 10); log(`${r.nombre} te rechazó amablemente.`, 'malo'); } }));
+      if (r.tipo === 'amigo' && this.puedeRomance(r)) {
+        a('😏', 'Coquetear', accion('coquetear', 2, () => this.coquetear(r)), `Sube la chispa (${usosRestantes('coquetear' + r.id, 2)} restantes este año)`);
+        a('💌', 'Confesar lo que sientes', accion('confesar', 1, () => this.confesar(r)), r.chispa >= 40 ? 'Hay química… ¿te animas?' : 'Arriesgado si no hay chispa', pareja() ? 'Ya tienes pareja.' : false);
+      }
       if (r.tipo === 'pareja') {
         a('🌹', 'Salir en una cita romántica', accion('cita', 2, () => { const c = Math.round(R.int(50, 300) * eco()); p.dinero -= c; r.cercania = clamp(r.cercania + R.int(5, 12)); mod({ felicidad: 5 }); log(`Saliste en una cita romántica con ${r.nombre}.`); }));
         a('💍', 'Proponer matrimonio', () => this.proponer(r), '', p.edad < 18 ? 'Debes ser mayor de edad.' : false);
@@ -79,6 +83,53 @@ const Relaciones = {
       if (r.tipo === 'amigo') a('🚫', 'Terminar la amistad', () => { r.vivo = false; r.tipo = 'borrado'; log(`Terminaste tu amistad con ${r.nombre}.`); Panel.atras(); });
       return its;
     });
+  },
+  /* Romance solo entre adolescentes de edad parecida o entre adultos */
+  puedeRomance(r) {
+    const a = S.p.edad, b = r.edad;
+    if (a < 13 || b < 13) return false;
+    if (a < 18 || b < 18) return a < 18 && b < 18 && Math.abs(a - b) <= 3;
+    return true;
+  },
+  hacerPareja(r, texto) {
+    const p = S.p;
+    r.tipo = 'pareja'; r.anios = 0; r.cercania = clamp(r.cercania + 10); r.chispa = 0;
+    p.cont.parejas++; mod({ felicidad: 12 });
+    log(texto || `💕 ¡Tú y ${r.nombre} pasaron de amigos a pareja!`, 'raro');
+    Efectos.celebrar('💕', '¡De amigos a pareja!', `<p>Tú y <b>${r.nombre}</b> ahora están juntos.</p>`);
+  },
+  coquetear(r) {
+    const p = S.p;
+    Rasgos.pista('carisma');
+    const sube = R.int(6, 16) + (Rasgos.tiene('carisma') ? 6 : 0) + Math.round((p.st.apariencia - 50) / 10);
+    if (R.chance(0.18)) { r.cercania = clamp(r.cercania - 6); log(`Coqueteaste con ${r.nombre}, pero fue incómodo para ambos.`, 'malo'); return toast('😬 Momento incómodo…'); }
+    r.chispa = clamp((r.chispa || 0) + Math.max(3, sube));
+    const reacciones = r.chispa >= 70 ? [`${r.nombre} se puso roj${gx(r, 'o', 'a')} y no dejó de sonreír.`, `${r.nombre} te devolvió el coqueteo sin disimulo.`] : r.chispa >= 40 ? [`${r.nombre} se rió nerviosamente.`, `${r.nombre} te miró de una forma distinta.`] : [`${r.nombre} no pareció darse cuenta.`, `${r.nombre} creyó que bromeabas.`];
+    log(`😏 Coqueteaste con ${r.nombre}. ${R.pick(reacciones)}`);
+    toast(`💗 Chispa ${r.chispa}%`);
+  },
+  confesar(r) {
+    const p = S.p;
+    if (pareja()) return toast('Ya tienes pareja.');
+    const prob = (r.chispa || 0) / 120 + r.cercania / 400 + (Rasgos.tiene('carisma') ? 0.1 : 0) + (p.st.apariencia - r.apa) / 300;
+    Efectos.suspenso('💌 Le dices lo que sientes…', () => {
+      if (R.chance(clamp(prob * 100, 3, 92) / 100)) this.hacerPareja(r, `💕 Le confesaste tus sentimientos a ${r.nombre}… ¡y siente lo mismo!`);
+      else {
+        r.chispa = 0; mod({ felicidad: -8 });
+        if (R.chance(0.3)) { r.cercania = clamp(r.cercania - 25); log(`💔 ${r.nombre} no siente lo mismo y ahora la amistad está rara.`, 'malo'); }
+        else { r.cercania = clamp(r.cercania - 8); log(`💔 ${r.nombre} te dijo que te quiere… pero como amig${gx(p, 'o', 'a')}.`, 'malo'); }
+        aviso('Zona de amigos', `<p>"Eres muy especial para mí, pero no te veo de esa forma."</p>`, '💔');
+      }
+    }, 1500, '💌');
+  },
+  /* Tu amigo o amiga se enamora de ti */
+  enamorado(r) {
+    const p = S.p, pa = pareja();
+    Modal.mostrar({ ic: '💘', titulo: `${r.nombre} está enamorad${gx(r, 'o', 'a')} de ti`, texto: `<p>${r.nombre} te cuenta, muy nervios${gx(r, 'o', 'a')}, que hace tiempo siente algo más que amistad por ti.</p>${pa ? `<p>Pero tú estás con ${pa.nombre}…</p>` : ''}`, opciones: [
+      op(pa ? `Dejar a ${pa.nombre} por ${r.nombre}` : 'Yo también siento lo mismo', () => { if (pa) { if (pa.tipo === 'conyuge') Relaciones.divorcio(pa); else Relaciones.terminar(pa); } this.hacerPareja(r, `💕 ${r.nombre} se te declaró y empezaron a salir.`); }),
+      op('Prefiero que sigamos siendo amigos', () => { r.chispa = 0; if (R.chance(0.35)) { r.cercania = clamp(r.cercania - 25); log(`${r.nombre} se alejó un poco después de que l${gx(r, 'o', 'a')} rechazaras.`, 'malo'); } else { r.cercania = clamp(r.cercania - 5); log(`Le dijiste a ${r.nombre} que prefieres su amistad. Lo entendió.`); } }),
+      op('Necesito pensarlo', () => { r.chispa = clamp((r.chispa || 0) + 25); log(`Le pediste tiempo a ${r.nombre} para pensarlo.`); }),
+    ] });
   },
   regalo(r) {
     const p = S.p;
@@ -312,6 +363,8 @@ const Relaciones = {
         if (R.chance(0.03 + (r.cercania < 40 ? 0.08 : 0))) { log(`😳 Descubriste que ${r.nombre} te fue infiel.`, 'malo'); r.cercania = clamp(r.cercania - 30); mod({ felicidad: -15 }); }
         if (r.cercania < 12 && R.chance(0.5)) { log(`${r.nombre} pidió el divorcio.`, 'malo'); this.divorcio(r); }
       }
+      if (r.tipo === 'amigo' && !pareja() && this.puedeRomance(r) && r.cercania >= 65 && !p.carcel && R.chance(0.025 + (r.chispa || 0) / 500 + (Rasgos.tiene('carisma') ? 0.02 : 0) + (p.st.apariencia - 50) / 2000)) { this.enamorado(r); continue; }
+      if (r.tipo === 'amigo' && r.chispa) r.chispa = clamp(r.chispa - 5);
       if (r.tipo === 'amigo' && r.cercania < 15 && R.chance(0.3)) { r.tipo = 'borrado'; r.vivo = false; log(`Te distanciaste de tu amig${gx(r, 'o', 'a')} ${r.nombre}.`, 'gris'); }
       // Nietos
       if (r.tipo === 'hijo' && r.edad >= 24 && r.edad <= 42 && R.chance(0.07)) {
