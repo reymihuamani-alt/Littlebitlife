@@ -98,7 +98,7 @@ const Politica = {
   resultado(id, cam, listo) {
     if (!listo) return Efectos.suspenso('🗳️ Contando los votos…', () => this.resultado(id, cam, true), 1800, '🗳️');
     const p = S.p, c = CARGOS[id], po = this.estado();
-    let prob = 0.36 + (Rasgos.tiene('carisma') ? 0.07 : 0) + (p.apellidoRep || 0) / 400 + Math.abs(p.apellidoRep || 0) / 1000 + cam.coinc * 0.12 + cam.gasto + cam.debate * 0.05 + (p.st.fama - 30) / 260 + (p.st.inteligencia - 50) / 400 + (p.st.karma - 50) / 600 + (p.st.apariencia - 50) / 600 - c.dif - po.sobornos * 0.03 - (p.antecedentes ? 0.1 : 0);
+    let prob = 0.36 + (Rasgos.tiene('carisma') ? 0.07 : 0) + Habilidades.nivel('carisma') * 0.01 + (p.apellidoRep || 0) / 400 + Math.abs(p.apellidoRep || 0) / 1000 + cam.coinc * 0.12 + cam.gasto + cam.debate * 0.05 + (p.st.fama - 30) / 260 + (p.st.inteligencia - 50) / 400 + (p.st.karma - 50) / 600 + (p.st.apariencia - 50) / 600 - c.dif - po.sobornos * 0.03 - (p.antecedentes ? 0.1 : 0);
     if (cam.reeleccion) prob += (po.aprobacion - 50) / 120;
     prob = clamp(prob * 100, 3, 92) / 100;
     const gano = R.chance(prob);

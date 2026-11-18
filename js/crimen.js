@@ -37,7 +37,7 @@ const Crimen = {
     const p = S.p;
     if (!usar('peleaCalle', 1)) return;
     const rival = { nombre: `${R.pick(NOMBRES.M)} "${R.pick(['el Loco', 'Puños', 'el Chato', 'la Roca', 'el Flaco'])}"`, fuerza: R.int(30, 75) };
-    Minijuegos.pelea({ titulo: '👊 Pelea callejera', rival, poder: p.st.salud * 0.6 + (p.esp.luchador ? p.esp.luchador.entreno * 0.5 : 10) + (Rasgos.tiene('atleta') ? 12 : 0), alFin: gano => {
+    Minijuegos.pelea({ titulo: '👊 Pelea callejera', rival, poder: p.st.salud * 0.6 + (p.esp.luchador ? p.esp.luchador.entreno * 0.5 : 10) + (Rasgos.tiene('atleta') ? 12 : 0) + Habilidades.nivel('combate') * 2, alFin: gano => {
       Rasgos.pista('atleta'); Rasgos.pista('temperamental');
       mod({ karma: -3 });
       if (gano) { mod({ felicidad: 4 }); if (p.esp.org) p.esp.org.respeto += 4; log(`👊 Le ganaste una pelea callejera a ${rival.nombre}.`, 'raro'); }

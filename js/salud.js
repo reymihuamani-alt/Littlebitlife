@@ -43,7 +43,7 @@ const Salud = {
     // Progresión
     for (const en of [...p.enf]) {
       const d = ENFERMEDADES[en.n]; en.anios++;
-      mod({ salud: -Math.round(d.grav * R.float(0.5, 1.2)), felicidad: d.fel ? Math.round(d.fel / 2) : -2, inteligencia: d.intel ? Math.round(d.intel / 3) : 0 });
+      mod({ salud: -Math.round(d.grav * R.float(0.5, 1.2) * (Habilidades.nivel('auxilios') >= 3 ? 1 - Habilidades.nivel('auxilios') * 0.04 : 1)), felicidad: d.fel ? Math.round(d.fel / 2) : -2, inteligencia: d.intel ? Math.round(d.intel / 3) : 0 });
       const autoCura = { 'Gripe fuerte': 0.75, 'Neumonía': 0.55, 'Insomnio': 0.4, 'Lesión de rodilla': 0.5, 'Ansiedad': 0.15, 'Depresión': 0.12, 'Migraña crónica': 0.08 }[en.n] || 0;
       if (R.chance(autoCura)) { p.enf = p.enf.filter(x => x !== en); log(`Te recuperaste de: ${en.n}.`, 'bueno'); continue; }
       if (d.muerte && R.chance(d.muerte * (1 + Math.min(en.anios, 5) * 0.25))) { Vida.morir(en.n.toLowerCase()); return; }

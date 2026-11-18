@@ -293,6 +293,8 @@ const LOGROS = [
   { id:'semanaModa',    ic:'👠', n:'Pasarela', d:'Desfila en una Semana de la Moda.' },
   { id:'embajador',     ic:'🤝', n:'Rostro de la marca', d:'Firma un contrato de embajador.' },
   { id:'icono',         ic:'👑', n:'Ícono de la moda', d:'Llega a lo más alto del modelaje.' },
+  { id:'maestro',       ic:'🎖️', n:'Maestría', d:'Lleva una habilidad a nivel 10.' },
+  { id:'vecino',        ic:'🏘️', n:'Buen vecino', d:'Hazte amigo de un vecino.' },
   { id:'tesoro',        ic:'🏺', n:'Cazatesoros', d:'Encuentra un artículo legendario.' },
   { id:'subasta',       ic:'🔨', n:'¡Vendido!', d:'Vende algo por más de $1 M en una subasta.' },
   { id:'mercadoNegro',  ic:'🕳️', n:'Bajo la mesa', d:'Compra algo en el mercado negro.' },

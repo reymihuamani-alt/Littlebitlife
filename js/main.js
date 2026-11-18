@@ -80,6 +80,7 @@ const Menu = {
         { sec: 'Tu vida' },
         { ic: ob.ic, t: `Objetivo: ${ob.nombre}`, s: `${ob.desc} · ${Objetivos.pista()}`, der: p.objCumplido ? '✅' : '', fn: () => this.cambiarObjetivo() },
         re.id !== 'ninguno' ? { ic: re.ic, t: `Reto: ${re.nombre}`, s: re.desc, der: p.retoCumplido ? '✅' : '' } : null,
+        { ic: '🎓', t: 'Habilidades', s: Object.keys(HABILIDADES).filter(k => Habilidades.nivel(k) > 0).map(k => `${HABILIDADES[k].ic}${Habilidades.nivel(k)}`).join(' ') || 'Aún sin entrenar', fn: () => Habilidades.panel() },
         { ic: '🧬', t: 'Tus rasgos', s: `${(p.rasgos || []).filter(x => x.visto).length}/${(p.rasgos || []).length} descubiertos`, fn: () => Rasgos.panel() },
         { ic: '🏛️', t: 'Legado', s: `${Legado.cargar().puntos} puntos · mejoras para tus próximas vidas`, fn: () => Legado.panel() },
         { ic: '📊', t: 'Estadísticas de la vida', fn: () => this.estadisticas() },

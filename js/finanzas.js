@@ -38,6 +38,7 @@ const Finanzas = {
       if (p.vivienda === 'calle') g = 600 * e;
     }
     g *= { austero: 0.65, normal: 1, lujoso: 2.8 }[p.estilo];
+    if (Habilidades.nivel('jardineria') >= 3) g *= 0.95;
     g += hijos().filter(h => h.edad < 18).length * 3500 * e;
     g += p.mascotas.filter(m => m.vivo).length * 500 * e;
     if (p.objetos && p.objetos.seguro) g += 1800 * e;
@@ -90,7 +91,7 @@ const Finanzas = {
       else if (b.tipo === 'auto' && !b.aprecia) r = -R.float(0.1, 0.18);
       else r = b.aprecia ? R.normal(0.06, 0.15) : -0.07;
       b.valor = Math.max(100, Math.round(b.valor * (1 + r)));
-      p.dinero -= Math.round(b.valor * (MANTENIMIENTO[b.tipo] || 0.02) * (b.n === 'Yate' ? 3 : b.n === 'Jet privado' ? 2.5 : 1));
+      p.dinero -= Math.round(b.valor * (MANTENIMIENTO[b.tipo] || 0.02) * (b.tipo === 'auto' && Habilidades.nivel('mecanica') >= 3 ? 0.5 : 1) * (b.n === 'Yate' ? 3 : b.n === 'Jet privado' ? 2.5 : 1));
       if (b.alquilada) { const a = Math.round(b.valor * (b.renta || 0.045)); p.dinero += a; }
       if (b.robado && R.chance(0.1)) { p.bienes = p.bienes.filter(x => x !== b); log(`🚓 La policía identificó tu ${b.n} como robado y lo confiscó.`, 'malo'); if (R.chance(0.4)) Crimen.arrestar('receptación de bienes robados', [1, 3]); }
       if (b.n === 'Club de fútbol') { const t = R.pick(['campeón de liga', 'subcampeón', 'de mitad de tabla', 'casi descendido']); mod({ fama: t === 'campeón de liga' ? 6 : 1, felicidad: t === 'campeón de liga' ? 10 : t === 'casi descendido' ? -6 : 0 }); log(`⚽ Tu club terminó la temporada ${t}.`, t === 'campeón de liga' ? 'raro' : ''); if (t === 'campeón de liga') Noticias.emitir(`¡El club de ${p.nombre} ${p.apellido} es campeón de liga!`); }
@@ -158,8 +159,8 @@ const Finanzas = {
   mudarse() {
     const p = S.p, ops = [];
     if (personas('padre', 'madre').length) ops.push({ t: '👪 Vivir con mis padres (barato)', fn: () => { p.vivienda = 'padres'; p.casaId = null; log('Te mudaste con tus padres.'); } });
-    ops.push({ t: `🏢 Alquilar un departamento (~${fmt$(9000 * eco())}/año)`, fn: () => { p.vivienda = 'alquiler'; p.casaId = null; log('Te mudaste a un departamento alquilado.'); mod({ felicidad: 3 }); } });
-    for (const b of p.bienes.filter(b => b.tipo === 'casa')) ops.push({ t: `🏠 Vivir en mi ${b.n}`, fn: () => { p.vivienda = 'propia'; p.casaId = b.id; b.alquilada = false; log(`Te mudaste a tu ${b.n}.`); mod({ felicidad: 5 }); } });
+    ops.push({ t: `🏢 Alquilar un departamento (~${fmt$(9000 * eco())}/año)`, fn: () => { p.vivienda = 'alquiler'; p.casaId = null; log('Te mudaste a un departamento alquilado.'); Barrio.mudanza(); mod({ felicidad: 3 }); } });
+    for (const b of p.bienes.filter(b => b.tipo === 'casa')) ops.push({ t: `🏠 Vivir en mi ${b.n}`, fn: () => { p.vivienda = 'propia'; p.casaId = b.id; b.alquilada = false; log(`Te mudaste a tu ${b.n}.`); Barrio.mudanza(); mod({ felicidad: 5 }); } });
     ops.push({ t: 'Cancelar' });
     Modal.mostrar({ ic: '🏡', titulo: 'Mudarse', texto: '<p>¿Dónde quieres vivir?</p>', opciones: ops });
   },
@@ -342,7 +343,7 @@ const Negocios = {
       const nec = this.necesarios(n);
       const falta = Math.max(0, nec - n.empleados) / nec, sobra = Math.max(0, n.empleados - nec * 1.3);
       let r = s.margen + (n.calidad - 50) / 260 + (n.marketing - 30) / 450 - falta * 0.15 + (S.eco.estado === 'recesion' ? -0.09 : S.eco.estado === 'auge' ? 0.05 : 0) + R.normal(0, s.riesgo * 0.3);
-      r += Math.min(0.06, (p.st.inteligencia - 50) / 800) + (Rasgos.tiene('emprendedor') ? 0.04 : 0);
+      r += Math.min(0.06, (p.st.inteligencia - 50) / 800) + (Rasgos.tiene('emprendedor') ? 0.04 : 0) + (['rest', 'cafe'].includes(n.sector) ? Habilidades.nivel('cocina') * 0.006 : 0) + (n.sector === 'startup' ? Habilidades.nivel('programacion') * 0.006 : 0);
       let g = Math.round(n.capital * r * s.escala * 0.8 - sobra * 28000 * eco());
       if (n.sector === 'startup' && n.calidad >= 55 && R.chance(0.08)) {
         const x = R.float(3, 12); n.valor = Math.round(n.valor * x);

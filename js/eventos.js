@@ -85,7 +85,7 @@ const EVENTOS = [
   ] }) },
   { id: 'asalto', edad: [14, 85], p: 0.04, fn: p => Modal.mostrar({ ic: '🔪', titulo: '¡Un asalto!', texto: '<p>Un ladrón te amenaza en la calle y te pide tus cosas.</p>', opciones: [
     op('Entregarle todo', () => { const m = Math.min(Math.max(0, p.dinero), Math.round(R.int(20, 400) * eco())); p.dinero -= m; mod({ felicidad: -6, estres: 8 }); log(m > 0 ? `Te asaltaron y te robaron ${fmt$(m)} y el celular.` : 'Te asaltaron y te robaron el celular.', 'malo'); }),
-    op('Resistirme', () => { if (R.chance(p.st.salud / 200 + (p.esp.luchador ? 0.3 : 0))) { mod({ felicidad: 6 }); log('Te defendiste y el ladrón huyó.', 'raro'); } else { mod({ salud: -R.int(10, 30) }); log('Te resististe y saliste herid' + gx(p, 'o', 'a') + '.', 'malo'); if (R.chance(0.03)) Vida.morir('un asalto a mano armada'); } }),
+    op('Resistirme', () => { if (R.chance(p.st.salud / 200 + (p.esp.luchador ? 0.3 : 0) + Habilidades.nivel('combate') * 0.04)) { mod({ felicidad: 6 }); log('Te defendiste y el ladrón huyó.', 'raro'); } else { mod({ salud: -R.int(10, 30) }); log('Te resististe y saliste herid' + gx(p, 'o', 'a') + '.', 'malo'); if (R.chance(0.03)) Vida.morir('un asalto a mano armada'); } }),
     op('Correr', () => { if (R.chance(0.6)) log('Corriste y lograste escapar del asaltante.'); else { mod({ salud: -8 }); log('Te alcanzó y te golpeó.', 'malo'); } }),
   ] }) },
   { id: 'herenciaTio', edad: [20, 70], p: 0.008, once: true, fn: p => { const m = Math.round(R.int(10000, 400000) * eco()); p.dinero += m; log(`📜 Un tío lejano que casi no conocías te dejó una herencia de ${fmt$(m)}.`, 'raro'); aviso('Herencia inesperada', `<p>Recibiste ${fmt$(m)}.</p>`, '📜'); } },

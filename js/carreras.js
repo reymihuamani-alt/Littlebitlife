@@ -148,7 +148,7 @@ const Carreras = {
       ];
     });
   },
-  poderLucha() { const p = S.p, l = p.esp.luchador; return p.st.salud * 0.45 + (l ? l.entreno : 0) * 0.55 - Math.max(0, p.edad - 32) * 1.5 + (Rasgos.tiene('atleta') ? 12 : 0); },
+  poderLucha() { const p = S.p, l = p.esp.luchador; return p.st.salud * 0.45 + (l ? l.entreno : 0) * 0.55 - Math.max(0, p.edad - 32) * 1.5 + (Rasgos.tiene('atleta') ? 12 : 0) + Habilidades.nivel('combate') * 1.5; },
   pelearMMA() {
     const p = S.p, l = p.esp.luchador;
     if (p.st.salud < 30) return toast('Estás demasiado lastimad' + gx(p, 'o', 'a') + ' para pelear.');

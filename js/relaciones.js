@@ -32,6 +32,7 @@ const Relaciones = {
       const mas = p.mascotas.filter(m => m.vivo);
       if (mas.length) { its.push({ sec: 'Mascotas' }); for (const m of mas) its.push({ ic: m.ic, t: m.nombre, s: `${m.t} · ${m.edad} años`, fn: () => this.mascota(m) }); }
       its.push({ sec: 'Conocer gente' });
+      if (p.edad >= 4) its.push({ ic: '🏘️', t: `Tu barrio: ${Barrio.b().nombre}`, s: 'Vecinos, chismes y novedades', fn: () => Barrio.panel() });
       if (p.edad >= 6) its.push({ ic: '🙋', t: 'Hacer nuevos amigos', fn: () => { if (!usar('amigos', 2)) return; if (R.chance(0.6 + (p.st.felicidad - 50) / 200)) this.nuevoAmigo(p.edad < 18 ? 'en el colegio' : 'en un evento'); else toast('No conectaste con nadie esta vez.'); } });
       if (p.edad >= 16 && !p.carcel) its.push({ ic: '💘', t: 'Buscar pareja', s: pareja() ? 'Ya tienes pareja… ¿seguro?' : 'Citas y apps', fn: () => this.citas() });
       if (p.edad >= 21 && !p.carcel) its.push({ ic: '🥂', t: 'Gala de la alta sociedad', s: 'Conoce gente rica… o de la realeza', dis: p.st.fama < 40 && patrimonio() < 1e6 ? 'Necesitas fama 40 o patrimonio de $1 M.' : false, fn: () => this.gala() });
@@ -187,7 +188,7 @@ const Relaciones = {
     const p = S.p;
     const actual = pareja();
     Rasgos.pista('carisma');
-    let prob = 0.45 + (Rasgos.tiene('carisma') ? 0.12 : 0) + (p.apellidoRep || 0) / 800 + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
+    let prob = 0.45 + (Rasgos.tiene('carisma') ? 0.12 : 0) + Habilidades.nivel('carisma') * 0.012 + (p.apellidoRep || 0) / 800 + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
     if (c.real) prob -= 0.25 - p.st.fama / 300;
     if (R.chance(clamp(prob * 100, 5, 92) / 100)) {
       if (actual) {

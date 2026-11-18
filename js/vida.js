@@ -28,6 +28,8 @@ const Vida = {
     if (p.vivo) this.hitos();
     if (p.vivo) Rasgos.anual();
     if (p.vivo) Coleccion.anual();
+    if (p.vivo) Habilidades.anual();
+    if (p.vivo) Barrio.anual();
     if (p.vivo) Sombra.anual();
     p.cont.sumaFel += p.st.felicidad; p.cont.anios++;
     p.usos = {};

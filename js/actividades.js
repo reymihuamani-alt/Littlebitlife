@@ -27,6 +27,7 @@ const Actividades = {
       }
       if (S.caso && S.caso.activo) { its.push({ sec: '🚨 Caso abierto' }); a('🔎', S.caso.apodo, `${S.caso.victimas} víctimas · ${S.caso.pistas.length} pistas`, () => Asesino.panelCaso()); }
       its.push({ sec: 'Cuerpo y mente' });
+      a('🎓', 'Habilidades', 'Cocina, música, programación, mecánica…', () => Habilidades.panel());
       a('🏋️', 'Gimnasio', '+salud, +apariencia', () => { if (!usar('gym', 3)) return; mod({ salud: R.int(1, 3) + (Rasgos.tiene('atleta') ? 2 : 0), apariencia: R.int(0, 2), estres: -3, felicidad: 1 }); Rasgos.pista('atleta'); if (R.chance(0.02)) { Salud.contraer('Lesión de rodilla'); log('Te lesionaste en el gimnasio.', 'malo'); } else log('Fuiste al gimnasio.'); }, e < 12 ? 'Desde los 12 años.' : false);
       a('🏃', 'Salir a correr', '+salud', () => { if (!usar('correr', 3)) return; mod({ salud: R.int(1, 3), estres: -2 }); log('Saliste a correr.'); });
       a('🧘', 'Meditar', '−estrés, +felicidad', () => { if (!usar('meditar', 3)) return; mod({ estres: -R.int(4, 9), felicidad: 2 }); log('Meditaste un rato.'); }, e < 10 ? 'Desde los 10 años.' : false);
@@ -100,6 +101,7 @@ const Actividades = {
     const ecoAntes = eco();
     if (!conTrabajo && p.trabajo) Trabajo.dejar(`Dejaste tu empleo para emigrar.`);
     p.pais = destino;
+    Barrio.mudanza();
     if (p.vivienda === 'padres') p.vivienda = 'alquiler';
     if (p.esp.politica && p.esp.politica.cargo) { log('Perdiste tu cargo político al emigrar.', 'malo'); p.esp.politica.cargo = null; }
     p.cont.viajes++;

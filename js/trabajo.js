@@ -17,7 +17,7 @@ const Trabajo = {
     if (p.edad < (r.edadMin || 18)) m.push(`Edad mínima ${r.edadMin || 18}`);
     if (r.edadMax && p.edad > r.edadMax) m.push(`Edad máxima ${r.edadMax}`);
     if (r.edu && nivelEdu() < NIVEL_EDU[r.edu]) m.push(`Estudios: ${r.edu}`);
-    if (r.carrera && !r.carrera.some(c => tieneTitulo('universidad', c))) m.push(`Título en ${r.carrera.join(' / ')}`);
+    if (r.carrera && !r.carrera.some(c => tieneTitulo('universidad', c)) && !(d.id === 'programador' && Habilidades.nivel('programacion') >= 6)) m.push(`Título en ${r.carrera.join(' / ')}`);
     if (r.titulo && !tieneTitulo(r.titulo)) m.push(`Título: ${POSGRADOS[r.titulo]?.nombre || r.titulo}`);
     if (r.int && p.st.inteligencia < r.int) m.push(`Inteligencia ${r.int}%`);
     if (r.apa && p.st.apariencia < r.apa) m.push(`Apariencia ${r.apa}%`);
@@ -58,7 +58,7 @@ const Trabajo = {
       ic: '🤝', titulo: `Entrevista: ${d.niveles[0]}`, texto: `<p>El entrevistador pregunta:</p><p><b>"${pr.q}"</b></p>`,
       opciones: R.shuffle(pr.o).map(([t, v]) => ({ t, fn: () => {
         const dific = d.cat === 'Universitario' ? 0.05 : d.cat === 'Especial' ? 0.1 : -0.05;
-        let prob = 0.42 + v * 0.22 + (Rasgos.tiene('carisma') ? 0.1 : 0) + (p.apellidoRep || 0) / 500 + (p.st.inteligencia - 50) / 220 + (p.st.apariencia - 50) / 350 - dific + (p.expTrab[d.id] ? 0.15 : 0) - (p.antecedentes ? 0.12 : 0) - (S.eco.estado === 'recesion' ? 0.12 : 0) - (p.edad > 55 ? 0.15 : 0);
+        let prob = 0.42 + v * 0.22 + (Rasgos.tiene('carisma') ? 0.1 : 0) + Habilidades.nivel('carisma') * 0.012 + (p.apellidoRep || 0) / 500 + (p.st.inteligencia - 50) / 220 + (p.st.apariencia - 50) / 350 - dific + (p.expTrab[d.id] ? 0.15 : 0) - (p.antecedentes ? 0.12 : 0) - (S.eco.estado === 'recesion' ? 0.12 : 0) - (p.edad > 55 ? 0.15 : 0);
         if (R.chance(clamp(prob * 100, 5, 92) / 100)) this.contratar(d);
         else { log(`No te contrataron como ${d.niveles[0]}.`, 'malo'); mod({ felicidad: -4 }); aviso('No fue esta vez', `<p>"Gracias por tu tiempo. Hemos decidido seguir con otros candidatos."</p>${S.eco.estado === 'recesion' ? '<p class="nota">La recesión hace que haya menos vacantes.</p>' : ''}`, '📭'); }
       } })),
