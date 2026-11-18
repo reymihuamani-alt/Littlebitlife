@@ -20,6 +20,7 @@ const Objetivos = {
       case 'campeon': return !!(e.luchador && e.luchador.campeon);
       case 'familia': return !!(p.rel.some(r => r.tipo === 'conyuge' && r.vivo) && hijos().length >= 3 && p.edad >= 60 && p.st.felicidad >= 70);
       case 'matusalen': return p.edad >= 100;
+      case 'superviviente': return !!p.cont.sobrevivioApoc;
       default: return false;
     }
   },
@@ -55,6 +56,7 @@ const Objetivos = {
       case 'campeon': return e.luchador ? `Ranking #${e.luchador.ranking}` : 'Salud 60 y un gimnasio de MMA';
       case 'familia': return `${hijos().length}/3 hijos · ${pareja() && pareja().tipo === 'conyuge' ? 'casad' + gx(p, 'o', 'a') : 'sin casarte'}`;
       case 'matusalen': return `${p.edad}/100 años`;
+      case 'superviviente': return Apocalipsis.activo() ? `Mes ${S.apoc.mes} · ${S.apoc.comida} comida · ${S.apoc.agua} agua` : S.apocProgramado ? 'Algo se acerca… prepárate' : 'Aprende jardinería, mecánica, defensa y primeros auxilios';
       default: return 'Vive a tu manera';
     }
   },
@@ -100,6 +102,7 @@ const Objetivos = {
     if (e.luchador && (e.luchador.campeon || e.luchador.g >= 15)) add('atleta');
     if (e.astronauta && e.astronauta.misiones) add('astronauta');
     if (c.saltos) add('viajero');
+    if (c.sobrevivioApoc || (S.apoc && S.apoc.mes >= 12)) add('superviviente');
     if (e.modelo && e.modelo.nivel >= 4) add('supermodelo');
     if (p.negocios.some(n => n.valor >= 5e6)) add('empresario');
     if (c.tesoros || (p.coleccion || []).some(x => x.tasado && !x.falso && x.valor >= 1e6)) add('coleccionista');

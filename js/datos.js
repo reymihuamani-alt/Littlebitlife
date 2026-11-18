@@ -130,6 +130,7 @@ const OBJETIVOS = [
   { id:'medico',       ic:'🩺', nombre:'Director médico',     desc:'Llegar a dirigir un hospital.', stats:['inteligencia'] },
   { id:'campeon',      ic:'🥊', nombre:'Campeón de lucha',    desc:'Ganar el cinturón mundial de MMA.', stats:['salud'] },
   { id:'familia',      ic:'👨‍👩‍👧‍👦', nombre:'Gran familia',   desc:'Casarte, tener 3+ hijos y llegar a los 60 con felicidad ≥ 70.', stats:['felicidad'] },
+  { id:'superviviente', ic:'🧟', nombre:'Superviviente',       desc:'El fin del mundo llegará en esta vida. Prepárate y sobrevive hasta el rescate.', stats:['salud'] },
   { id:'matusalen',    ic:'🐢', nombre:'Matusalén',           desc:'Vivir 100 años.', stats:['salud','felicidad'] },
 ];
 /* Retos opcionales */
@@ -297,6 +298,7 @@ const LOGROS = [
   { id:'vecino',        ic:'🏘️', n:'Buen vecino', d:'Hazte amigo de un vecino.' },
   { id:'portal',        ic:'🌀', n:'¿Qué es eso verde?', d:'Ve un portal al multiverso.' },
   { id:'multiverso',    ic:'🪐', n:'Viajero entre mundos', d:'Salta a otra versión de tu vida.' },
+  { id:'superviviente',  ic:'🧟', n:'Superviviente', d:'Sobrevive al fin del mundo.' },
   { id:'tesoro',        ic:'🏺', n:'Cazatesoros', d:'Encuentra un artículo legendario.' },
   { id:'subasta',       ic:'🔨', n:'¡Vendido!', d:'Vende algo por más de $1 M en una subasta.' },
   { id:'mercadoNegro',  ic:'🕳️', n:'Bajo la mesa', d:'Compra algo en el mercado negro.' },

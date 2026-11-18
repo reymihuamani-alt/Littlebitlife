@@ -123,6 +123,7 @@ const Finanzas = {
       if (p.esp.org && p.esp.org.dineroSucio > 0) its.push({ info: `🕶️ Dinero sin lavar: <b>${fmt$(p.esp.org.dineroSucio)}</b> (no cuenta en tu patrimonio).` });
       if (p.edad < 18) { its.push({ info: 'Eres menor de edad: tus padres administran el hogar. Puedes pedirles dinero desde Relaciones.' }); if (p.negocios.length) { its.push({ sec: 'Empresas familiares' }, { info: 'Un administrador gestiona tus empresas hasta que cumplas 18. Los dividendos llegan a tu cuenta.' }); for (const n of p.negocios) its.push({ ic: n.ic, t: n.nombre, s: `${n.sectorN} · valor ${fmt$(n.valor)}` }); } }
       if (p.carcel) { its.push({ info: 'Estás en prisión: no puedes hacer operaciones.' }); return its; }
+      if (Apocalipsis.activo()) { its.push({ info: '🧟 Los bancos cerraron y el dinero no vale nada. Lo que importa ahora está en la pestaña de supervivencia.' }); return its; }
       if (p.edad >= 18) {
         its.push({ sec: 'Vida diaria' });
         its.push({ ic: '🏡', t: 'Vivienda', s: { padres: 'Con tus padres', alquiler: 'Alquilas un departamento', propia: 'En tu propia casa', calle: 'Sin hogar' }[p.vivienda], fn: () => this.mudarse() });

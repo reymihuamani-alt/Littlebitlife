@@ -11,6 +11,12 @@ const Actividades = {
     Panel.abrir('Actividades', () => {
       const p = S.p, e = p.edad, its = [];
       const a = (ic, t, s, fn, dis) => its.push({ ic, t, s, fn, dis });
+      if (Apocalipsis.activo()) {
+        its.push({ info: '🧟 El mundo se acabó. Ya no hay gimnasios, cines ni casinos. Solo sobrevivir.' });
+        a('🧟', 'Supervivencia', 'Explorar, reforzar, curar…', () => Apocalipsis.panel());
+        a('🎓', 'Habilidades', 'Mira lo que sabes hacer', () => Habilidades.panel());
+        return its;
+      }
       if (p.carcel) {
         its.push({ info: 'Estás en prisión. Tus opciones son limitadas.' });
         a('⛓️', 'Vida en prisión', 'Conducta, ejercicio, fuga…', () => Crimen.panelCarcel());

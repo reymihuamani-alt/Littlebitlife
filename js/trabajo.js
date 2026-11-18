@@ -183,6 +183,7 @@ const Trabajo = {
 const Ocupacion = {
   abrir() {
     if (S.p.carcel) return Crimen.panelCarcel();
+    if (Apocalipsis.activo()) return Apocalipsis.panel();
     Panel.abrir(() => S.p.edad < 18 ? 'Escuela y trabajo' : 'Ocupación', () => {
       const p = S.p;
       if (p.carcel) return [{ info: 'Estás en prisión.' }];

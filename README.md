@@ -36,6 +36,10 @@ La partida y los logros se guardan automáticamente en el navegador.
 | **Noticiero** | Titulares del mundo, chismes sobre ti cuando eres famoso y "Última hora" que interrumpe tu año. |
 | **Asesino en serie** | Un asesino aterroriza tu ciudad: víctimas en las noticias, pistas, sospechosos y la posibilidad de desenmascararlo. O vive tu propia **doble vida** de justiciero con código: los medios te ponen apodo, las redes se dividen, un detective toca tu puerta… |
 | **Legado** | Al morir ganas puntos según tus cintas (las nuevas valen más), objetivo y reto. Colecciona 25 cintas y compra mejoras permanentes: don de nacimiento, buenos genes, autoconocimiento, fondo familiar, destino y segunda oportunidad. |
+| **Habilidades** | 10 habilidades con niveles (cocina, carisma, programación, música, pintura, escritura, jardinería, mecánica, defensa personal, primeros auxilios). El tiempo libre es limitado; clubes y trabajos también entrenan. Desbloquean ingresos (freelance, discos, novelas, apps virales, obras maestras) y bonos. |
+| **Barrio vivo** | Vecinos con personalidad que viven su propia vida (bodas, divorcios, loterías, arrestos, mudanzas), novedades del barrio, fiestas, juntas vecinales, chismes, favores y amistades. |
+| **Modo absurdo** (desactivable) | Ciencia loca en el garaje, un tío abuelo científico con aventuras, abducciones, mascotas que hablan y **portales al multiverso**: saltas a otra versión de tu vida (capo, presidente, monje, monarca…) y tu otro yo puede venir a reclamarla. |
+| **Fin del mundo** | Un brote que empieza como rumor en el noticiero, te deja prepararte (provisiones, refuerzos) y luego cambia las reglas: el tiempo avanza por meses y sobrevives con comida, agua, medicinas, materiales y munición, defendiendo tu refugio con tu grupo frente a hordas, saqueadores, enfermedades e infecciones hasta el rescate. Elige el objetivo "Superviviente" para vivirlo seguro. |
 | **Modo Dios** | Edita estadísticas, dinero y antecedentes (desactiva los logros de esa vida). |
 
 ## Estructura
@@ -54,6 +58,10 @@ js/historias.js     Decisiones que regresan años después
 js/noticias.js      Noticiero
 js/asesino.js       El caso del asesino de la ciudad y la doble vida
 js/modelaje.js      Carrera de modelo completa
+js/habilidades.js   Habilidades con niveles
+js/barrio.js        Vecinos y vida de barrio
+js/multiverso.js    Modo absurdo y multiverso
+js/apocalipsis.js   El fin del mundo
 js/coleccion.js     Artículos raros, tasación, subastas y la tienda
 js/mercadonegro.js  Mercado negro
 js/*.js             Un módulo por sistema (educación, trabajo, carreras, cine,

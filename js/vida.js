@@ -6,6 +6,7 @@
 const Vida = {
   cumplirAnios() {
     if (!S || !S.p.vivo || Modal.activo) return;
+    if (Apocalipsis.activo()) return Apocalipsis.turno();
     const p = S.p;
     Panel.cerrar();
     p.edad++; S.anio++;
@@ -34,6 +35,7 @@ const Vida = {
     p.cont.sumaFel += p.st.felicidad; p.cont.anios++;
     p.usos = {};
     if (p.vivo) Noticias.anual();
+    if (p.vivo) Apocalipsis.anual();
     if (p.vivo) Asesino.anual();
     if (p.vivo) Historias.anual();
     if (p.vivo) Eventos.anual();

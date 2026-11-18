@@ -60,7 +60,7 @@ function render() {
   $('#barra-objetivo').innerHTML = `${ob.ic} Objetivo: <b>${ob.nombre}</b>${p.objCumplido ? ' ✅' : ''} — ${esc(Objetivos.pista())}${re && re.id !== 'ninguno' ? ` · ${re.ic} Reto: <b>${re.nombre}</b>${p.retoCumplido ? ' ✅' : ''}` : ''}`;
   // registro
   const reg = $('#registro');
-  reg.innerHTML = p.log.slice(-60).map(e => `<div class="anio"><h4>Edad ${e.edad} · ${e.anio}</h4>${e.l.map(([t, c]) => `<p class="${c}">${t}</p>`).join('') || '<p class="gris">Un año tranquilo.</p>'}</div>`).join('');
+  reg.innerHTML = p.log.slice(-60).map(e => `<div class="anio"><h4>Edad ${e.edad} · ${e.anio}${e.mes ? ` · 🧟 mes ${e.mes}` : ''}</h4>${e.l.map(([t, c]) => `<p class="${c}">${t}</p>`).join('') || `<p class="gris">${e.mes ? 'Un mes sin novedades.' : 'Un año tranquilo.'}</p>`}</div>`).join('');
   reg.scrollTop = reg.scrollHeight;
   // stats
   const keys = ['felicidad', 'salud', 'inteligencia', 'apariencia', 'estres', 'fama'];
@@ -68,6 +68,9 @@ function render() {
   $('#nav-ocupacion').textContent = p.carcel ? 'Prisión' : (p.edad < 18 || p.edu.enCurso) && !p.trabajo ? 'Escuela' : 'Trabajo';
   document.querySelector('[data-nav="ocupacion"] span').textContent = p.carcel ? '⛓️' : (p.edad < 18 || p.edu.enCurso) && !p.trabajo ? '🎓' : '💼';
   $('#btn-edad').classList.toggle('muerto', !p.vivo);
+  const apoc = typeof Apocalipsis !== 'undefined' && Apocalipsis.activo();
+  $('#btn-edad small').textContent = apoc ? 'Mes' : 'Edad';
+  $('#btn-edad').classList.toggle('apoc', apoc);
 }
 
 function ocupacionTexto() {
