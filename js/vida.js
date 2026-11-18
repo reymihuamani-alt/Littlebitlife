@@ -147,6 +147,25 @@ const Vida = {
       <p class="nota">Total disponible: <b>${l.puntos}</b> puntos · Colección: ${l.cintas.length}/${CINTAS.length} cintas</p>
       <button class="btn sec" id="btn-legado">🏛️ Gastar puntos de legado</button></div>`;
   },
+  /* Reputación del apellido (−100 escándalo … +100 prestigio). Se diluye con cada generación. */
+  reputacionDe(v) {
+    const c = v.cont, e = v.esp;
+    let r = (v.apellidoRep || 0) * 0.5;
+    r += (v.st.karma >= 45 ? 1 : -1) * v.st.fama * 0.4;
+    if (c.cargos.includes('presidente')) r += 25; else if (c.cargos.length) r += 8;
+    if (e.director && e.director.estatuillas) r += 15;
+    if (c.detective) r += 15;
+    if (c.donado >= 1e5) r += 15;
+    if (c.reino) r += 20;
+    if (c.sombraExpuesta) r -= 55;
+    if (e.org && e.org.rango >= 3) r -= 20;
+    if (c.aniosCarcel >= 10) r -= 15;
+    if (v.politicaEscandalo) r -= 10;
+    return Math.round(clamp(r, -100, 100));
+  },
+  textoReputacion(r) {
+    return r >= 60 ? 'Leyenda' : r >= 30 ? 'Prestigio' : r >= 15 ? 'Buen nombre' : r > -15 ? 'Neutral' : r > -40 ? 'Mala fama' : 'Escándalo';
+  },
   ultimaOcupacion() {
     const p = S.p, e = p.esp;
     if (e.realeza && e.realeza.titulo) return e.realeza.titulo;
@@ -164,14 +183,25 @@ const Vida = {
     const viejo = S.p, anio = S.anio;
     const herederos = hijos().length + (viejo.rel.some(r => r.tipo === 'conyuge' && r.vivo) ? 1 : 0);
     const pt = Math.max(0, patrimonio());
-    const parte = Math.round(pt * 0.9 / Math.max(1, herederos));
+    // Las empresas y la productora pasan íntegras al heredero que continúa la historia
+    const negocios = viejo.negocios.map(n => ({ ...n }));
+    const valorNeg = negocios.reduce((s, n) => s + n.valor * (n.participacion ?? 1), 0);
+    const dir = viejo.esp.director;
+    const org = viejo.esp.org && viejo.esp.org.rango >= 2 ? viejo.esp.org : null;
+    const rep = this.reputacionDe(viejo);
+    const parte = Math.round(Math.max(0, pt - valorNeg) * 0.9 / Math.max(1, herederos));
+    const lista = [`💵 <b>${fmt$(parte)}</b> en efectivo (tu parte de la herencia)`];
+    if (negocios.length) lista.push(`🏢 ${negocios.length === 1 ? 'La empresa familiar' : `Las ${negocios.length} empresas familiares`}: ${negocios.map(n => `<b>${esc(n.nombre)}</b>`).join(', ')} (${fmt$(valorNeg)})`);
+    if (dir) lista.push(`🎬 La productora <b>${esc(dir.productora)}</b> (${dir.peliculas.length} película${dir.peliculas.length === 1 ? "" : "s"}${dir.estatuillas ? ', ' + '🏆'.repeat(dir.estatuillas) : ''})`);
+    if (org) lista.push(`🕶️ Un lugar en <b>${esc(org.nombre)}</b>, la organización de tu familia`);
+    lista.push(`${rep >= 15 ? '🌟' : rep <= -15 ? '🗞️' : '😐'} Reputación del apellido ${esc(viejo.apellido)}: <b>${this.textoReputacion(rep)}</b>`);
     const dinastia = { millonarios: [...S.dinastia.millonarios, pt >= 1e6] };
     const eraMonarca = viejo.esp.realeza && viejo.esp.realeza.monarca && !viejo.esp.realeza.consorte;
     const eraReal = !!viejo.esp.realeza;
     const heredero = hijos().filter(x => x.real).sort((a, b) => b.edad - a.edad)[0];
     const conyuge = viejo.rel.find(r => r.tipo === 'conyuge' && r.vivo) || viejo.rel.find(r => r.id === h.otroPadre);
     Modal.mostrar({
-      ic: '🌳', titulo: `La vida de ${h.nombre}`, texto: `<p>Heredarás aproximadamente <b>${fmt$(parte)}</b>. Elige el objetivo para esta nueva vida:</p>`,
+      ic: '🌳', titulo: `La vida de ${h.nombre}`, texto: `<p>Lo que heredas:</p>${lista.map(x => `<p>${x}</p>`).join('')}<p>Elige el objetivo para esta nueva vida:</p>`,
       opciones: OBJETIVOS.map(o => ({ t: `${o.ic} ${o.nombre}`, fn: () => {
         const clase = parte > 5e6 ? 'rica' : parte > 2e5 ? 'alta' : viejo.clase === 'pobre' && parte < 2e4 ? 'pobre' : 'media';
         const heredados = (viejo.rasgos || []).map(x => x.id).filter(id => HEREDABLES.includes(id) && R.chance(0.4));
@@ -179,8 +209,12 @@ const Vida = {
         const p = S.p;
         p.edad = Math.max(0, h.edad); p.clase = clase;
         p.st.apariencia = h.apa; p.st.inteligencia = h.int; p.st.felicidad = clamp(h.cercania - 20); p.st.salud = R.int(60, 100);
-        p.st.fama = eraReal ? 50 : Math.round(viejo.st.fama * 0.3);
+        p.st.fama = eraReal ? 50 : Math.round(viejo.st.fama * 0.45);
         p.dinero = parte;
+        p.apellidoRep = rep;
+        p.negocios = negocios;
+        if (dir) p.esp.director = { productora: dir.productora, habilidad: clamp(Math.round(dir.habilidad * 0.25) + 10), reputacion: clamp(Math.round(dir.reputacion * 0.7)), peliculas: [], estatuillas: 0, legado: { fundador: `${viejo.nombre} ${viejo.apellido}`, peliculas: dir.peliculas.length + (dir.legado ? dir.legado.peliculas : 0), estatuillas: dir.estatuillas + (dir.legado ? dir.legado.estatuillas : 0) } };
+        if (org) p.esp.org = { ...org, activo: false, operacion: 0, dineroSucio: 0, rango: Math.max(0, org.rango - 2), respeto: Math.round(org.respeto * 0.4), calor: Math.round(org.calor * 0.5), miembros: Math.round(org.miembros * 0.5), seguridad: Math.round(org.seguridad * 0.5) };
         // Familia: el progenitor fallecido, el otro progenitor y los hermanos
         p.rel = [];
         p.rel.push({ id: uid(), tipo: viejo.genero === 'F' ? 'madre' : 'padre', genero: viejo.genero, nombre: viejo.nombre, apellido: viejo.apellido, edad: viejo.edad, cercania: h.cercania, vivo: false, profesion: this.ultimaOcupacion(), dinero: 0, apa: viejo.st.apariencia, int: viejo.st.inteligencia });
@@ -200,6 +234,11 @@ const Vida = {
         p.log = [{ edad: p.edad, anio, l: [] }];
         log(`🌳 Continúas la historia familiar como <b>${esc(p.nombre)} ${esc(p.apellido)}</b> (${p.edad} años), hij${gx(p, 'o', 'a')} de ${esc(viejo.nombre)}.`, 'info');
         log(`📜 Heredaste ${fmt$(parte)}.`, 'bueno');
+        for (const n of p.negocios) log(`🏢 Heredaste la empresa familiar <b>${esc(n.nombre)}</b> (${n.sectorN}, valor ${fmt$(n.valor * (n.participacion ?? 1))}).${p.edad < 18 ? ' Un administrador la gestionará hasta tu mayoría de edad.' : ''}`, 'bueno');
+        if (p.esp.director) log(`🎬 Heredaste la productora <b>${esc(p.esp.director.productora)}</b>. La industria respeta el legado de ${esc(viejo.nombre)}.`, 'raro');
+        if (p.esp.org) log(`🕶️ Los viejos socios de ${esc(viejo.nombre)} en ${esc(p.esp.org.nombre)} dicen que hay un lugar para ti cuando quieras… (Actividades → Crimen).`, 'malo');
+        if (rep >= 15) log(`🌟 El apellido ${esc(p.apellido)} es sinónimo de <b>${this.textoReputacion(rep).toLowerCase()}</b>: abre puertas en entrevistas, citas y elecciones.`, 'raro');
+        else if (rep <= -15) log(`🗞️ El apellido ${esc(p.apellido)} carga con <b>${this.textoReputacion(rep).toLowerCase()}</b>: la gente te juzga antes de conocerte.`, 'malo');
         if (p.esp.realeza && p.esp.realeza.monarca) log(`👑 Asciendes al trono como <b>${p.esp.realeza.titulo}</b>.`, 'raro');
         if (o.id !== 'libre') log(`🎯 Meta de esta vida: <b>${o.nombre}</b>. ${o.desc}`, 'raro');
         Objetivos.revisar();

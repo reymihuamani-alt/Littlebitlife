@@ -187,7 +187,7 @@ const Relaciones = {
     const p = S.p;
     const actual = pareja();
     Rasgos.pista('carisma');
-    let prob = 0.45 + (Rasgos.tiene('carisma') ? 0.12 : 0) + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
+    let prob = 0.45 + (Rasgos.tiene('carisma') ? 0.12 : 0) + (p.apellidoRep || 0) / 800 + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
     if (c.real) prob -= 0.25 - p.st.fama / 300;
     if (R.chance(clamp(prob * 100, 5, 92) / 100)) {
       if (actual) {

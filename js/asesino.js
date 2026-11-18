@@ -186,7 +186,7 @@ const Sombra = {
   },
   capturado(motivo) {
     const p = S.p, s = p.esp.sombra;
-    s.activo = false;
+    s.activo = false; p.cont.sombraExpuesta = true;
     const apodo = s.apodo || 'el justiciero misterioso';
     log(`🚔 ${motivo}. Te arrestaron.`, 'malo');
     Noticias.emitir(`¡CAE ${apodo.toUpperCase()}! Era ${p.nombre} ${p.apellido}, ${Vida.ultimaOcupacion().toLowerCase()} de ${p.edad} años.`, { modal: true, ic: '🚔', cuerpo: `<p>Vecinos y compañeros no lo pueden creer: "Parecía una persona totalmente normal".</p><p>Tu cara está en todas las pantallas del mundo.</p>` });

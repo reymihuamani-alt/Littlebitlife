@@ -101,7 +101,7 @@ const Menu = {
     Panel.abrir('Estadísticas', () => {
       const p = S.p, c = p.cont;
       return [
-        { kv: [['Edad', p.edad], ['País', `${PAISES[p.pais].bandera} ${p.pais}`], ['Generación', p.generacion], ['Origen', { pobre: 'Humilde', media: 'Clase media', alta: 'Acomodada', rica: 'Muy rica', real: 'Realeza' }[p.clase]], ['Patrimonio neto', fmt$(patrimonio())], ['Patrimonio máximo', fmt$(c.maxPatrimonio)], ['Karma', p.st.karma + '%']] },
+        { kv: [['Edad', p.edad], ['País', `${PAISES[p.pais].bandera} ${p.pais}`], ['Generación', p.generacion], ['Origen', { pobre: 'Humilde', media: 'Clase media', alta: 'Acomodada', rica: 'Muy rica', real: 'Realeza' }[p.clase]], ['Reputación del apellido', `${Vida.textoReputacion(p.apellidoRep || 0)} (${p.apellidoRep || 0})`], ['Patrimonio neto', fmt$(patrimonio())], ['Patrimonio máximo', fmt$(c.maxPatrimonio)], ['Karma', p.st.karma + '%']] },
         { kv: [['Parejas', c.parejas], ['Matrimonios', c.matrimonios], ['Hijos', c.hijos], ['Viajes', c.viajes], ['Profesiones', c.profesiones.length], ['Películas', c.peliculas], ['Donado', fmt$(c.donado)]] },
         { kv: [['Delitos', c.crimenes], ['Antecedentes', p.antecedentes], ['Años en prisión', c.aniosCarcel], ['Fugas', c.fugas], ['Cirugías estéticas', c.cirugias]] },
         { kv: [['Economía', { normal: 'Estable', recesion: '📉 Recesión', auge: '📈 Auge' }[S.eco.estado]], ['Gastos de vida', fmt$(Finanzas.gastosVida()) + '/año']] },

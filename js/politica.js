@@ -98,7 +98,7 @@ const Politica = {
   resultado(id, cam, listo) {
     if (!listo) return Efectos.suspenso('🗳️ Contando los votos…', () => this.resultado(id, cam, true), 1800, '🗳️');
     const p = S.p, c = CARGOS[id], po = this.estado();
-    let prob = 0.36 + (Rasgos.tiene('carisma') ? 0.07 : 0) + cam.coinc * 0.12 + cam.gasto + cam.debate * 0.05 + (p.st.fama - 30) / 260 + (p.st.inteligencia - 50) / 400 + (p.st.karma - 50) / 600 + (p.st.apariencia - 50) / 600 - c.dif - po.sobornos * 0.03 - (p.antecedentes ? 0.1 : 0);
+    let prob = 0.36 + (Rasgos.tiene('carisma') ? 0.07 : 0) + (p.apellidoRep || 0) / 400 + Math.abs(p.apellidoRep || 0) / 1000 + cam.coinc * 0.12 + cam.gasto + cam.debate * 0.05 + (p.st.fama - 30) / 260 + (p.st.inteligencia - 50) / 400 + (p.st.karma - 50) / 600 + (p.st.apariencia - 50) / 600 - c.dif - po.sobornos * 0.03 - (p.antecedentes ? 0.1 : 0);
     if (cam.reeleccion) prob += (po.aprobacion - 50) / 120;
     prob = clamp(prob * 100, 3, 92) / 100;
     const gano = R.chance(prob);
@@ -147,6 +147,7 @@ const Politica = {
     if (po.sobornos && R.chance(0.12 * po.sobornos)) {
       po.aprobacion = clamp(po.aprobacion - 25); mod({ fama: 5, felicidad: -15 });
       log('📰 ¡ESCÁNDALO! La prensa reveló tus sobornos.', 'malo');
+      p.politicaEscandalo = true;
       Noticias.emitir(`Escándalo: revelan que ${CARGOS[po.cargo].n} ${p.nombre} ${p.apellido} recibió sobornos.`, { modal: true, ic: '📰' });
       if (R.chance(0.35)) { po.cargo = null; Crimen.arrestar('corrupción de funcionarios', [3, 9]); return 0; }
     }

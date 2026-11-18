@@ -58,7 +58,7 @@ const Trabajo = {
       ic: '🤝', titulo: `Entrevista: ${d.niveles[0]}`, texto: `<p>El entrevistador pregunta:</p><p><b>"${pr.q}"</b></p>`,
       opciones: R.shuffle(pr.o).map(([t, v]) => ({ t, fn: () => {
         const dific = d.cat === 'Universitario' ? 0.05 : d.cat === 'Especial' ? 0.1 : -0.05;
-        let prob = 0.42 + v * 0.22 + (Rasgos.tiene('carisma') ? 0.1 : 0) + (p.st.inteligencia - 50) / 220 + (p.st.apariencia - 50) / 350 - dific + (p.expTrab[d.id] ? 0.15 : 0) - (p.antecedentes ? 0.12 : 0) - (S.eco.estado === 'recesion' ? 0.12 : 0) - (p.edad > 55 ? 0.15 : 0);
+        let prob = 0.42 + v * 0.22 + (Rasgos.tiene('carisma') ? 0.1 : 0) + (p.apellidoRep || 0) / 500 + (p.st.inteligencia - 50) / 220 + (p.st.apariencia - 50) / 350 - dific + (p.expTrab[d.id] ? 0.15 : 0) - (p.antecedentes ? 0.12 : 0) - (S.eco.estado === 'recesion' ? 0.12 : 0) - (p.edad > 55 ? 0.15 : 0);
         if (R.chance(clamp(prob * 100, 5, 92) / 100)) this.contratar(d);
         else { log(`No te contrataron como ${d.niveles[0]}.`, 'malo'); mod({ felicidad: -4 }); aviso('No fue esta vez', `<p>"Gracias por tu tiempo. Hemos decidido seguir con otros candidatos."</p>${S.eco.estado === 'recesion' ? '<p class="nota">La recesión hace que haya menos vacantes.</p>' : ''}`, '📭'); }
       } })),
