@@ -315,6 +315,7 @@ const Relaciones = {
         Estado.darLogro('padre');
         if (p.esp.realeza) Realeza.nacimientoHeredero(h);
         Amorios.hijoNacido(h, otro);
+        Crianza.nacimiento(h, otro);
       } }],
     });
   },
@@ -390,6 +391,7 @@ const Relaciones = {
       if (m.edad >= m.vida) { m.vivo = false; log(`🌈 Tu ${m.t.toLowerCase()} ${m.nombre} murió de viejo.`, 'malo'); mod({ felicidad: -10 }); }
     }
     Amorios.anual();
+    Crianza.anual();
     // Soledad en la adultez
     if (p.edad > 25 && !pareja() && !personas('amigo').length) mod({ felicidad: -3 });
   },

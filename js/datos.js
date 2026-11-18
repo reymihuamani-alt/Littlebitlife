@@ -300,6 +300,7 @@ const LOGROS = [
   { id:'multiverso',    ic:'🪐', n:'Viajero entre mundos', d:'Salta a otra versión de tu vida.' },
   { id:'superviviente',  ic:'🧟', n:'Superviviente', d:'Sobrevive al fin del mundo.' },
   { id:'amante',        ic:'🤫', n:'Amor prohibido', d:'Ten una aventura secreta.' },
+  { id:'crianzaSola',   ic:'🧍', n:'Contra viento y marea', d:'Cría a tus hijos sin pareja.' },
   { id:'tesoro',        ic:'🏺', n:'Cazatesoros', d:'Encuentra un artículo legendario.' },
   { id:'subasta',       ic:'🔨', n:'¡Vendido!', d:'Vende algo por más de $1 M en una subasta.' },
   { id:'mercadoNegro',  ic:'🕳️', n:'Bajo la mesa', d:'Compra algo en el mercado negro.' },

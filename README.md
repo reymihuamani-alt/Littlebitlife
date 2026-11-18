@@ -26,6 +26,7 @@ La partida y los logros se guardan automáticamente en el navegador.
 | **Artículos raros** | 17 tesoros en 4 rarezas (del billete con error de impresión al violín de Cremona o el fósil de dinosaurio) que aparecen muy rara vez: mercado de pulgas, detector de metales en la playa, el ático de los abuelos, herencias, remodelaciones, excavaciones. Hay que tasarlos (pueden ser falsos) y venderlos en subasta (con guerras de pujas), a un coleccionista, en una casa de empeño, en el mercado negro… o donarlos a un museo. |
 | **Negocios** | 10 sectores, capital, empleados, calidad, marketing, reinversión, rondas de inversión, salida a bolsa y venta. |
 | **Relaciones** | Padres, hermanos, amigos, citas, galas de alta sociedad, matrimonio (con o sin acuerdo prenupcial), divorcio, hijos, adopción, nietos, mascotas, herencias. |
+| **Crianza** | Paternidad joven (18-23): la otra persona decide si forman una familia, crían por separado o te deja sol@; tu familia puede apoyarte (dinero y cuidado, para seguir estudiando) o rechazarte (y reconciliarse años después); búsqueda urgente de trabajo. Criar en solitario con más estrés y eventos propios: noches sin dormir, guardería o abuelos, fiebre de madrugada, cumpleaños, berrinches, preguntas difíciles, reuniones del colegio, talentos, citas como padre o madre soltera, agotamiento, red de apoyo del barrio y disputas de custodia. |
 | **Amoríos e intimidad** | La intimidad con tu pareja baja el estrés. Aventuras secretas con amantes (citas a escondidas, riesgo de que te descubran, presión para que dejes a tu pareja). Hijos fuera de la pareja: puedes confesarlo (tu pareja decide si acepta al niño), ocultarlo pagando manutención o no reconocerlo (demanda de paternidad). Fertilidad realista según la edad, con una posibilidad remotísima en la vejez. |
 | **Crimen** | Delitos menores y mayores, juicios con distintos abogados, prisión (conducta, pandillas, libertad condicional, apelación), fuga en un laberinto y la **organización criminal**: rangos, respeto, calor policial, territorios, producción, sobornos, informantes, redadas y lavado de dinero. |
 | **Realeza** | Línea de sucesión, coronación, popularidad, abdicación, casarse con la realeza, abolición de la monarquía. |
@@ -63,6 +64,8 @@ js/habilidades.js   Habilidades con niveles
 js/barrio.js        Vecinos y vida de barrio
 js/multiverso.js    Modo absurdo y multiverso
 js/apocalipsis.js   El fin del mundo
+js/amorios.js       Amantes, intimidad y fertilidad
+js/crianza.js       Paternidad joven y crianza en solitario
 js/coleccion.js     Artículos raros, tasación, subastas y la tienda
 js/mercadonegro.js  Mercado negro
 js/*.js             Un módulo por sistema (educación, trabajo, carreras, cine,
