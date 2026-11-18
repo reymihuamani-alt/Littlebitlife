@@ -39,7 +39,7 @@ const Finanzas = {
     }
     g *= { austero: 0.65, normal: 1, lujoso: 2.8 }[p.estilo];
     if (Habilidades.nivel('jardineria') >= 3) g *= 0.95;
-    g += hijos().filter(h => h.edad < 18).length * 3500 * e;
+    g += hijos().filter(h => h.edad < 18 && h.viveCon !== 'otro').length * 3500 * e;
     g += p.mascotas.filter(m => m.vivo).length * 500 * e;
     if (p.objetos && p.objetos.seguro) g += 1800 * e;
     return Math.round(g);

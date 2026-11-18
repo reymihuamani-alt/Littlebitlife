@@ -129,5 +129,5 @@ function patrimonio() {
 }
 function etiquetaRel(r) {
   const g = r.genero === 'F';
-  return { padre: 'Padre', madre: 'Madre', hermano: g ? 'Hermana' : 'Hermano', pareja: g ? 'Novia' : 'Novio', conyuge: g ? 'Esposa' : 'Esposo', hijo: g ? 'Hija' : 'Hijo', amigo: g ? 'Amiga' : 'Amigo', ex: g ? 'Expareja' : 'Expareja', nieto: g ? 'Nieta' : 'Nieto', tio: g ? 'Tía abuela' : 'Tío abuelo' }[r.tipo] || r.tipo;
+  return { padre: 'Padre', madre: 'Madre', hermano: g ? 'Hermana' : 'Hermano', pareja: g ? 'Novia' : 'Novio', conyuge: g ? 'Esposa' : 'Esposo', hijo: g ? 'Hija' : 'Hijo', amigo: g ? 'Amiga' : 'Amigo', ex: g ? 'Expareja' : 'Expareja', nieto: g ? 'Nieta' : 'Nieto', tio: g ? 'Tía abuela' : 'Tío abuelo', amante: 'Amante' }[r.tipo] || r.tipo;
 }

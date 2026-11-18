@@ -29,13 +29,14 @@ const Relaciones = {
       grupo('Nietos', p.rel.filter(r => r.tipo === 'nieto'));
       grupo('Familia extendida', p.rel.filter(r => r.tipo === 'tio'));
       grupo('Amigos', p.rel.filter(r => r.tipo === 'amigo' && r.vivo));
+      grupo('🤫 Amantes', p.rel.filter(r => r.tipo === 'amante' && r.vivo));
       grupo('Exparejas', p.rel.filter(r => r.tipo === 'ex' && r.vivo).slice(-6));
       const mas = p.mascotas.filter(m => m.vivo);
       if (mas.length) { its.push({ sec: 'Mascotas' }); for (const m of mas) its.push({ ic: m.ic, t: m.nombre, s: `${m.t} · ${m.edad} años`, fn: () => this.mascota(m) }); }
       its.push({ sec: 'Conocer gente' });
       if (p.edad >= 4) its.push({ ic: '🏘️', t: `Tu barrio: ${Barrio.b().nombre}`, s: 'Vecinos, chismes y novedades', fn: () => Barrio.panel() });
       if (p.edad >= 6) its.push({ ic: '🙋', t: 'Hacer nuevos amigos', fn: () => { if (!usar('amigos', 2)) return; if (R.chance(0.6 + (p.st.felicidad - 50) / 200)) this.nuevoAmigo(p.edad < 18 ? 'en el colegio' : 'en un evento'); else toast('No conectaste con nadie esta vez.'); } });
-      if (p.edad >= 16 && !p.carcel) its.push({ ic: '💘', t: 'Buscar pareja', s: pareja() ? 'Ya tienes pareja… ¿seguro?' : 'Citas y apps', fn: () => this.citas() });
+      if (p.edad >= 16 && !p.carcel) its.push({ ic: '💘', t: 'Buscar pareja', s: pareja() ? 'Ya tienes pareja… ¿buscas una aventura?' : 'Citas y apps', fn: () => this.citas() });
       if (p.edad >= 21 && !p.carcel) its.push({ ic: '🥂', t: 'Gala de la alta sociedad', s: 'Conoce gente rica… o de la realeza', dis: p.st.fama < 40 && patrimonio() < 1e6 ? 'Necesitas fama 40 o patrimonio de $1 M.' : false, fn: () => this.gala() });
       if (p.edad >= 25 && !p.carcel) its.push({ ic: '🧸', t: 'Adoptar un niño', s: `Trámite ~${fmt$(15000 * eco())}`, fn: () => this.adoptar() });
       if (p.edad >= 6) its.push({ ic: '🐾', t: 'Adoptar una mascota', fn: () => this.adoptarMascota() });
@@ -81,6 +82,7 @@ const Relaciones = {
       }
       if (r.tipo === 'tio') a('🌀', 'Acompañarlo en una aventura', () => AventuraTio.ir(r), 'Nunca sabes cómo termina');
       if (r.tipo === 'ex') a('🔁', 'Intentar volver', accion('volver', 1, () => { if (!pareja() && R.chance(r.cercania / 200)) { r.tipo = 'pareja'; r.anios = 0; log(`Volviste con ${r.nombre}.`, 'bueno'); } else log(`${r.nombre} no quiere volver contigo.`, 'malo'); }));
+      Amorios.itemsPersona(r, a);
       a('😠', 'Discutir', accion('discutir', 1, () => { r.cercania = clamp(r.cercania - R.int(5, 15)); mod({ estres: -2 }); log(`Discutiste con ${r.nombre}.`, 'malo'); }));
       a('🤬', 'Insultar', accion('insultar', 1, () => { r.cercania = clamp(r.cercania - R.int(10, 25)); mod({ karma: -2 }); log(`Insultaste a ${r.nombre}.`, 'malo'); }));
       if (r.tipo === 'amigo') a('🚫', 'Terminar la amistad', () => { r.vivo = false; r.tipo = 'borrado'; log(`Terminaste tu amistad con ${r.nombre}.`); Panel.atras(); });
@@ -193,7 +195,11 @@ const Relaciones = {
     let prob = 0.45 + (Rasgos.tiene('carisma') ? 0.12 : 0) + Habilidades.nivel('carisma') * 0.012 + (p.apellidoRep || 0) / 800 + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
     if (c.real) prob -= 0.25 - p.st.fama / 300;
     if (R.chance(clamp(prob * 100, 5, 92) / 100)) {
-      if (actual) {
+      if (actual && p.edad >= 18 && c.edad >= 18) {
+        if (R.chance(0.2)) { mod({ karma: -6 }); log(`💥 ${actual.nombre} te descubrió coqueteando con ${c.nombre}.`, 'malo'); if (actual.tipo === 'conyuge') this.divorcio(actual, true); else this.terminar(actual, true); }
+        else return Amorios.nuevoAmante(c);
+        if (pareja()) return;
+      } else if (actual) {
         mod({ karma: -6 });
         if (R.chance(0.45)) { log(`💥 ${actual.nombre} descubrió que l${gx(actual, 'o', 'a')} engañabas con ${c.nombre}.`, 'malo'); if (actual.tipo === 'conyuge') this.divorcio(actual, true); else this.terminar(actual, true); }
         else log(`Tuviste una aventura secreta con ${c.nombre}.`, 'raro');
@@ -282,10 +288,10 @@ const Relaciones = {
         { t: 'Cancelar' },
       ] });
     }
-    const e = mujer.edad;
-    const prob = e < 30 ? 0.65 : e < 35 ? 0.5 : e < 40 ? 0.3 : e < 45 ? 0.1 : 0;
-    if (R.chance(prob)) this.nacer(r);
-    else if (e >= 45) aviso('No es posible', '<p>A esta edad un embarazo natural es casi imposible. Pueden considerar la adopción.</p>', '🩺');
+    const prob = Amorios.fertilidad(r);
+    mod({ estres: -R.int(5, 10) });
+    if (R.chance(prob)) Amorios.embarazo(r);
+    else if (prob < 0.05) aviso('Casi un milagro', `<p>A esta edad un embarazo es rarísimo (${prob < 0.005 ? 'menos de 1 entre 200' : 'alrededor de 1 entre 50'} por intento)… pero no imposible. Pueden seguir intentándolo cada año o considerar la adopción.</p>`, '🩺');
     else { log('Lo intentaron, pero no hubo embarazo este año.'); toast('Sin embarazo este año.'); }
   },
   nacer(otro, adoptado = false, edad = 0) {
@@ -308,6 +314,7 @@ const Relaciones = {
         mod({ felicidad: 15, estres: 6 });
         Estado.darLogro('padre');
         if (p.esp.realeza) Realeza.nacimientoHeredero(h);
+        Amorios.hijoNacido(h, otro);
       } }],
     });
   },
@@ -368,6 +375,7 @@ const Relaciones = {
       }
       if (r.tipo === 'amigo' && !pareja() && this.puedeRomance(r) && r.cercania >= 65 && !p.carcel && R.chance(0.025 + (r.chispa || 0) / 500 + (Rasgos.tiene('carisma') ? 0.02 : 0) + (p.st.apariencia - 50) / 2000)) { this.enamorado(r); continue; }
       if (r.tipo === 'amigo' && r.chispa) r.chispa = clamp(r.chispa - 5);
+      if (r.tipo === 'amante' && r.cercania < 20 && R.chance(0.4)) { r.tipo = 'ex'; log(`${r.nombre} terminó la aventura contigo.`, 'malo'); }
       if (r.tipo === 'amigo' && r.cercania < 15 && R.chance(0.3)) { r.tipo = 'borrado'; r.vivo = false; log(`Te distanciaste de tu amig${gx(r, 'o', 'a')} ${r.nombre}.`, 'gris'); }
       // Nietos
       if (r.tipo === 'hijo' && r.edad >= 24 && r.edad <= 42 && R.chance(0.07)) {
@@ -381,6 +389,7 @@ const Relaciones = {
       m.edad++; mod({ felicidad: 1, estres: -1 });
       if (m.edad >= m.vida) { m.vivo = false; log(`🌈 Tu ${m.t.toLowerCase()} ${m.nombre} murió de viejo.`, 'malo'); mod({ felicidad: -10 }); }
     }
+    Amorios.anual();
     // Soledad en la adultez
     if (p.edad > 25 && !pareja() && !personas('amigo').length) mod({ felicidad: -3 });
   },
