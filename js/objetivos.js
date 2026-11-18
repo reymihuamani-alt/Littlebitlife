@@ -66,13 +66,13 @@ const Objetivos = {
       p.objCumplido = true;
       const o = OBJETIVOS.find(x => x.id === p.objetivo);
       log(`🎯✅ ¡OBJETIVO CUMPLIDO: <b>${o.nombre}</b>!`, 'raro'); Estado.darLogro('objetivo'); mod({ felicidad: 15 });
-      if (!final) aviso('¡Objetivo cumplido!', `<p>Lograste tu meta de vida: <b>${o.ic} ${o.nombre}</b>.</p><p>Puedes seguir viviendo esta vida como quieras.</p>`, '🎯');
+      if (!final) Efectos.celebrar('🎯', '¡Objetivo cumplido!', `<p>Lograste tu meta de vida: <b>${o.ic} ${o.nombre}</b>.</p><p>Al morir ganarás +100 puntos de legado. Puedes seguir viviendo esta vida como quieras.</p>`);
     }
     if (!p.retoCumplido && p.reto !== 'ninguno' && this.cumpleReto(p.reto, final)) {
       p.retoCumplido = true;
       const r = RETOS.find(x => x.id === p.reto);
       log(`🏵️ ¡RETO COMPLETADO: <b>${r.nombre}</b>!`, 'raro'); Estado.darLogro('reto');
-      if (!final) aviso('¡Reto completado!', `<p>${r.ic} <b>${r.nombre}</b>: ${r.desc}</p>`, '🏵️');
+      if (!final) Efectos.celebrar('🏵️', '¡Reto completado!', `<p>${r.ic} <b>${r.nombre}</b>: ${r.desc}</p>`);
     }
     const pt = patrimonio();
     p.cont.maxPatrimonio = Math.max(p.cont.maxPatrimonio, pt);
@@ -85,27 +85,32 @@ const Objetivos = {
 
   /* Cintas: resumen de la vida al morir */
   cintas() {
-    const p = S.p, c = p.cont, e = p.esp, pt = patrimonio(), out = [];
-    const add = (ic, n, d) => out.push({ ic, n, d });
-    if (c.reino) add('👑', 'Realeza', 'Llevaste una corona.');
-    if (pt >= 1e9) add('💎', 'Magnate', 'Moriste con más de mil millones.');
-    else if (pt >= 5e6) add('💰', 'Rico', 'Dejaste una fortuna.');
-    if (p.st.fama >= 80) add('🌟', 'Famoso', 'Todo el mundo sabía tu nombre.');
-    if (c.cargos.includes('presidente')) add('🏛️', 'Jefe de Estado', 'Gobernaste tu país.');
-    else if (c.cargos.length) add('🗳️', 'Político', 'Ocupaste cargos públicos.');
-    if ((e.org && e.org.rango >= 3) || c.crimenes >= 12) add('🕶️', 'Criminal', 'Viviste al margen de la ley.');
-    if (c.aniosCarcel >= 15) add('⛓️', 'Presidiario', 'Pasaste media vida tras las rejas.');
-    if (tieneTitulo('doctorado')) add('📜', 'Académico', 'Llegaste a lo más alto del saber.');
-    if (c.parejas >= 8) add('💘', 'Casanova', 'Tuviste muchísimos amores.');
-    if (c.hijos >= 4) add('👨‍👩‍👧‍👦', 'Familiar', 'Criaste una gran familia.');
-    if (p.edad >= 95) add('🐢', 'Longevo', 'Viviste muchísimos años.');
-    if (p.st.karma >= 85 || c.donado >= 1e5) add('😇', 'Generoso', 'Dejaste el mundo mejor que como lo encontraste.');
-    if (c.viajes >= 8) add('🧳', 'Aventurero', 'Recorriste el mundo.');
-    if (p.edad < 30) add('🥀', 'Trágico', 'Tu vida terminó demasiado pronto.');
-    if (pt < 0) add('💸', 'Endeudado', 'Moriste debiendo dinero.');
-    if (c.anios && c.sumaFel / c.anios < 35) add('🌧️', 'Melancólico', 'La felicidad te fue esquiva.');
-    if (!out.length) add('😐', 'Ordinario', 'Una vida tranquila y sin sobresaltos.');
-    return out;
+    const p = S.p, c = p.cont, e = p.esp, pt = patrimonio(), ids = [];
+    const add = id => ids.push(id);
+    if (c.reino) add('realeza');
+    if (pt >= 1e9) add('magnate'); else if (pt >= 5e6) add('rico');
+    if (p.st.fama >= 80) add('famoso');
+    if (c.cargos.includes('presidente')) add('estadista'); else if (c.cargos.length) add('politico');
+    if (e.sombra && e.sombra.victimas >= 1) add('sombra');
+    if (c.detective) add('detective');
+    if ((e.org && e.org.rango >= 3) || c.crimenes >= 12) add('criminal');
+    if (c.aniosCarcel >= 15) add('presidiario');
+    if (tieneTitulo('doctorado')) add('academico');
+    if ((e.director && e.director.estatuillas) || (e.actor && e.actor.nivel >= 4)) add('estrella');
+    if (e.luchador && (e.luchador.campeon || e.luchador.g >= 15)) add('atleta');
+    if (e.astronauta && e.astronauta.misiones) add('astronauta');
+    if (p.negocios.some(n => n.valor >= 5e6)) add('empresario');
+    if (c.parejas >= 8) add('casanova');
+    if (c.hijos >= 4) add('familiar');
+    if (p.edad >= 95) add('longevo');
+    if (p.st.karma >= 85 || c.donado >= 1e5) add('generoso');
+    if (c.viajes >= 8) add('aventurero');
+    if (p.edad < 30) add('tragico');
+    if (pt < 0) add('endeudado');
+    if (c.anios && c.sumaFel / c.anios < 35) add('melancolico');
+    else if (c.anios >= 30 && c.sumaFel / c.anios >= 72) add('feliz');
+    if (!ids.length) add('ordinario');
+    return ids.map(id => CINTAS.find(x => x.id === id));
   },
 
   panelLogros() {

@@ -41,7 +41,8 @@ const Realeza = {
     mod({ fama: 25, felicidad: 20 });
     log(`👑👑 ¡Fuiste coronad${gx(p, 'o', 'a')} como <b>${r.titulo}</b>!`, 'raro');
     Estado.darLogro('rey');
-    aviso('¡Larga vida!', `<p>Hoy te conviertes en <b>${r.titulo}</b>.</p>`, '👑');
+    Efectos.celebrar('👑', '¡Larga vida!', `<p>Hoy te conviertes en <b>${r.titulo}</b>.</p>`);
+    Noticias.emitir(`Coronación histórica: ${p.nombre} es proclamad${gx(p, 'o', 'a')} ${r.titulo}.`);
   },
   casarConRealeza(c) {
     const p = S.p;

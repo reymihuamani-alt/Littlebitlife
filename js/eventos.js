@@ -11,12 +11,12 @@ const EVENTOS = [
     op('Darle algo de comer', () => { mod({ karma: 3, felicidad: 3 }); log('Le diste comida a un perro callejero.'); }),
     op('Ignorarlo', () => mod({ karma: -1 })),
   ] }) },
-  { id: 'bully', edad: [7, 16], p: 0.07, fn: p => Modal.mostrar({ ic: '😠', titulo: 'Te molestan en el colegio', texto: `<p>${R.pick(NOMBRES.M.concat(NOMBRES.F))}, de tu salón, se burla de ti todos los días.</p>`, opciones: [
+  { id: 'bully', edad: [7, 16], p: 0.07, fn: p => { const g = R.chance(0.5) ? 'M' : 'F', n = `${R.pick(NOMBRES[g])} ${R.pick(APELLIDOS)}`; if (!p.vistos.nemesis) { p.vistos.nemesis = 1; Historias.sembrar('nemesis', { n, g, paso: 1 }, R.int(3, 6)); } Modal.mostrar({ ic: '😠', titulo: 'Te molestan en el colegio', texto: `<p>${n}, de tu salón, se burla de ti todos los días.</p>`, opciones: [
     op('Enfrentarlo', () => { if (R.chance(p.st.salud / 130)) { log('Enfrentaste a quien te molestaba y te dejó en paz.', 'bueno'); mod({ felicidad: 6 }); } else { log('Intentaste defenderte, pero terminaste con un ojo morado.', 'malo'); mod({ salud: -5, felicidad: -6 }); } }),
     op('Contárselo a un profesor', () => { log('Le contaste al profesor y el acoso se detuvo.', 'bueno'); mod({ felicidad: 3 }); }),
     op('Ignorarlo', () => { mod({ felicidad: -5, estres: 6 }); log('Aguantaste las burlas en silencio.', 'malo'); }),
     op('Burlarme de vuelta', () => { mod({ karma: -2 }); if (R.chance(0.5)) { log('Tu respuesta hizo reír a toda la clase.', 'bueno'); mod({ felicidad: 4 }); } else log('La situación empeoró.', 'malo'); }),
-  ] }) },
+  ] }); } },
   { id: 'talentos', edad: [6, 16], p: 0.05, fn: p => Modal.mostrar({ ic: '🎤', titulo: 'Concurso de talentos', texto: '<p>Tu colegio organiza un concurso de talentos. ¿Qué presentas?</p>', opciones: [
     ...[['🎶 Cantar', 'felicidad'], ['💃 Bailar', 'salud'], ['😂 Contar chistes', 'inteligencia']].map(([t, s]) => op(t, () => { if (R.chance(p.st[s] / 140 + p.st.apariencia / 400)) { log(`🏆 ¡Ganaste el concurso de talentos ${t.slice(t.indexOf(' ') + 1).toLowerCase()}!`, 'bueno'); mod({ felicidad: 10, fama: 3 }); } else { log('No ganaste el concurso de talentos, pero te divertiste.'); mod({ felicidad: 2 }); } })),
     op('No participar', () => {}),
@@ -49,8 +49,8 @@ const EVENTOS = [
     op('No, gracias', () => log('Rechazaste el cigarro.')),
   ] }) },
   { id: 'primerAmor', edad: [12, 17], p: 0.07, cond: () => !pareja(), fn: p => { const c = Estado.persona({ tipo: 'pareja', edad: p.edad, genero: R.chance(0.5) ? 'M' : 'F' }); c.profesion = 'Estudiante'; c.dinero = 0; Modal.mostrar({ ic: '💌', titulo: 'Mariposas en el estómago', texto: `<p>Te gusta ${c.nombre}, de tu colegio.</p>`, opciones: [
-    op('Declararme', () => { if (R.chance(0.35 + (p.st.apariencia - c.apa) / 150)) { c.cercania = 70; c.anios = 0; p.rel.push(c); p.cont.parejas++; log(`💕 ¡${c.nombre} aceptó ser tu pareja!`, 'bueno'); mod({ felicidad: 12 }); } else { log(`${c.nombre} te rechazó frente a todos.`, 'malo'); mod({ felicidad: -10 }); } }),
-    op('Escribirle una carta anónima', () => { mod({ felicidad: 2 }); log(`Le escribiste una carta anónima a ${c.nombre}.`); }),
+    op('Declararme', () => { if (R.chance(0.35 + (p.st.apariencia - c.apa) / 150)) { c.cercania = 70; c.anios = 0; p.rel.push(c); p.cont.parejas++; log(`💕 ¡${c.nombre} aceptó ser tu pareja!`, 'bueno'); mod({ felicidad: 12 }); } else { log(`${c.nombre} te rechazó frente a todos.`, 'malo'); mod({ felicidad: -10 }); Historias.sembrar('amor_perdido', { n: c.nombre, g: c.genero, apa: c.apa }, R.int(12, 25)); } }),
+    op('Escribirle una carta anónima', () => { mod({ felicidad: 2 }); log(`Le escribiste una carta anónima a ${c.nombre}.`); Historias.sembrar('amor_perdido', { n: c.nombre, g: c.genero, apa: c.apa }, R.int(12, 25)); }),
     op('Guardármelo', () => {}),
   ] }); } },
   { id: 'ciberacoso', edad: [12, 19], p: 0.05, fn: p => Modal.mostrar({ ic: '📱', titulo: 'Ciberacoso', texto: '<p>Alguien publicó una foto vergonzosa tuya en redes sociales.</p>', opciones: [
@@ -70,18 +70,18 @@ const EVENTOS = [
   ] }) },
   /* ---------- Adultez ---------- */
   { id: 'billetera', edad: [10, 90], p: 0.04, fn: p => { const m = Math.round(R.int(50, 900) * eco()); Modal.mostrar({ ic: '👛', titulo: 'Una billetera en la calle', texto: `<p>Encuentras una billetera con ${fmt$(m)} y un documento de identidad.</p>`, opciones: [
-    op('Devolverla a su dueño', () => { mod({ karma: 6, felicidad: 3 }); if (R.chance(0.4)) { const r = Math.round(m * 0.3); p.dinero += r; log(`Devolviste la billetera y el dueño te dio ${fmt$(r)} de recompensa.`, 'bueno'); } else log('Devolviste la billetera a su dueño.', 'bueno'); }),
-    op('Quedarme el dinero', () => { p.dinero += m; mod({ karma: -6 }); log(`Te quedaste con ${fmt$(m)} de una billetera ajena.`, 'malo'); }),
+    op('Devolverla a su dueño', () => { mod({ karma: 6, felicidad: 3 }); Historias.sembrar('billetera_devuelta', { n: `${R.pick(NOMBRES.M.concat(NOMBRES.F))} ${R.pick(APELLIDOS)}` }, R.int(6, 18)); if (R.chance(0.4)) { const r = Math.round(m * 0.3); p.dinero += r; log(`Devolviste la billetera y el dueño te dio ${fmt$(r)} de recompensa.`, 'bueno'); } else log('Devolviste la billetera a su dueño.', 'bueno'); }),
+    op('Quedarme el dinero', () => { p.dinero += m; mod({ karma: -6 }); Historias.sembrar('billetera_robada', {}, R.int(2, 8)); log(`Te quedaste con ${fmt$(m)} de una billetera ajena.`, 'malo'); }),
     op('Llevarla a la policía', () => { mod({ karma: 4 }); log('Llevaste la billetera a la comisaría.'); }),
   ] }); } },
   { id: 'prestamoAmigo', edad: [20, 80], p: 0.05, cond: () => personas('amigo').length && S.p.dinero > 2000, fn: p => { const a = R.pick(personas('amigo')); const m = Math.round(Math.min(p.dinero * 0.3, R.int(500, 8000) * eco())); Modal.mostrar({ ic: '🤝', titulo: 'Un favor', texto: `<p>Tu amig${gx(a, 'o', 'a')} ${a.nombre} te pide prestado ${fmt$(m)}. Promete devolverlo.</p>`, opciones: [
-    op('Prestárselo', () => { p.dinero -= m; if (R.chance(0.55)) { p.dinero += m; a.cercania = clamp(a.cercania + 10); log(`${a.nombre} te devolvió el préstamo. Su amistad es más fuerte.`, 'bueno'); } else { a.cercania = clamp(a.cercania - 15); log(`${a.nombre} nunca te devolvió los ${fmt$(m)}.`, 'malo'); } }),
+    op('Prestárselo', () => { p.dinero -= m; if (R.chance(0.55)) { p.dinero += m; a.cercania = clamp(a.cercania + 10); log(`${a.nombre} te devolvió el préstamo. Su amistad es más fuerte.`, 'bueno'); } else { a.cercania = clamp(a.cercania - 15); log(`${a.nombre} nunca te devolvió los ${fmt$(m)}.`, 'malo'); Historias.sembrar('amigo_deudor', { n: a.nombre, g: a.genero }, R.int(5, 15)); } }),
     op('Decirle que no', () => { a.cercania = clamp(a.cercania - 8); }),
   ] }); } },
   { id: 'piramide', edad: [20, 75], p: 0.04, cond: () => S.p.dinero > 3000, fn: p => Modal.mostrar({ ic: '📈', titulo: '¡Inversión garantizada!', texto: '<p>Un conocido te ofrece entrar a un "club de inversión" que paga 50% mensual. Solo necesitas traer a dos amigos más.</p>', opciones: [
     op('Invertir la mitad de mis ahorros', () => { const m = Math.round(p.dinero / 2); p.dinero -= m; if (R.chance(0.1)) { p.dinero += m * 3; log(`Entraste temprano al esquema y sacaste ${fmt$(m * 2)} de ganancia antes de que colapsara.`, 'raro'); mod({ karma: -5 }); } else { log(`💸 Era una estafa piramidal. Perdiste ${fmt$(m)}.`, 'malo'); mod({ felicidad: -12 }); } }),
     op('Rechazarlo', () => log('Rechazaste una oferta que parecía demasiado buena para ser verdad.')),
-    op('Denunciarlo a la policía', () => { mod({ karma: 4 }); log('Denunciaste una estafa piramidal.', 'bueno'); }),
+    op('Denunciarlo a la policía', () => { mod({ karma: 4 }); log('Denunciaste una estafa piramidal.', 'bueno'); Historias.sembrar('testigo', {}, R.int(1, 3)); }),
   ] }) },
   { id: 'asalto', edad: [14, 85], p: 0.04, fn: p => Modal.mostrar({ ic: '🔪', titulo: '¡Un asalto!', texto: '<p>Un ladrón te amenaza en la calle y te pide tus cosas.</p>', opciones: [
     op('Entregarle todo', () => { const m = Math.min(Math.max(0, p.dinero), Math.round(R.int(20, 400) * eco())); p.dinero -= m; mod({ felicidad: -6, estres: 8 }); log(m > 0 ? `Te asaltaron y te robaron ${fmt$(m)} y el celular.` : 'Te asaltaron y te robaron el celular.', 'malo'); }),
@@ -149,24 +149,24 @@ const EVENTOS = [
     op('Romperle la cámara a uno', () => { mod({ fama: 4, karma: -4 }); if (R.chance(0.4)) Crimen.arrestar('daños y agresión', [0, 1]); else log('Rompiste la cámara de un paparazzi. Es tendencia.', 'raro'); }),
   ] }) },
   { id: 'reality', edad: [18, 60], p: 0.04, cond: () => S.p.st.fama >= 25 && S.p.st.fama < 75, fn: p => { const m = Math.round(R.int(20000, 150000) * Math.max(eco(), 0.5)); Modal.mostrar({ ic: '📺', titulo: 'Reality show', texto: `<p>Te invitan a un reality show de convivencia. Pagan ${fmt$(m)}.</p>`, opciones: [
-    op('Aceptar', () => { p.dinero += m; mod({ fama: R.int(5, 15), felicidad: R.int(-5, 8), estres: 8 }); log(`📺 Participaste en un reality show y ganaste ${fmt$(m)}.`, 'raro'); }),
+    op('Aceptar', () => { p.dinero += m; mod({ fama: R.int(5, 15), felicidad: R.int(-5, 8), estres: 8 }); log(`📺 Participaste en un reality show y ganaste ${fmt$(m)}.`, 'raro'); if (R.chance(0.6)) Historias.sembrar('meme', {}, R.int(3, 10)); }),
     op('Rechazar', () => {}),
   ] }); } },
   { id: 'mentor', edad: [18, 32], p: 0.03, fn: p => Modal.mostrar({ ic: '🧓', titulo: 'Un mentor', texto: '<p>Una persona muy exitosa se ofrece a ser tu mentor.</p>', opciones: [
-    op('Aceptar con gratitud', () => { mod({ inteligencia: R.int(3, 7), felicidad: 4 }); if (p.trabajo) p.trabajo.desempeno = clamp(p.trabajo.desempeno + 15); log('Aprendiste muchísimo de tu nuevo mentor.', 'bueno'); }),
+    op('Aceptar con gratitud', () => { mod({ inteligencia: R.int(3, 7), felicidad: 4 }); Historias.sembrar('mentor', {}, R.int(12, 30)); if (p.trabajo) p.trabajo.desempeno = clamp(p.trabajo.desempeno + 15); log('Aprendiste muchísimo de tu nuevo mentor.', 'bueno'); }),
     op('Rechazar: prefiero aprender solo', () => {}),
   ] }) },
   { id: 'hijoSuspendido', edad: [30, 70], p: 0.05, cond: () => hijos().some(h => h.edad >= 12 && h.edad <= 18), fn: p => { const h = R.pick(hijos().filter(h => h.edad >= 12 && h.edad <= 18)); Modal.mostrar({ ic: '🏫', titulo: 'Llamada del colegio', texto: `<p>Suspendieron a ${h.nombre} por pelearse en clase.</p>`, opciones: [
-    op('Hablar con calma', () => { h.cercania = clamp(h.cercania + 6); log(`Hablaste con ${h.nombre} sobre lo que pasó.`); }),
-    op('Castigarl' + gx(h, 'o', 'a') + ' sin celular un mes', () => { h.cercania = clamp(h.cercania - 8); log(`Castigaste a ${h.nombre}.`); }),
-    op('Restarle importancia', () => { h.cercania = clamp(h.cercania + 2); mod({ karma: -1 }); }),
+    op('Hablar con calma', () => { h.cercania = clamp(h.cercania + 6); log(`Hablaste con ${h.nombre} sobre lo que pasó.`); Historias.sembrar('hijo_agradece', { id: h.id }, R.int(4, 9)); }),
+    op('Castigarl' + gx(h, 'o', 'a') + ' sin celular un mes', () => { h.cercania = clamp(h.cercania - 8); log(`Castigaste a ${h.nombre}.`); if (R.chance(0.5)) Historias.sembrar('hijo_problemas', { id: h.id }, R.int(3, 7)); }),
+    op('Restarle importancia', () => { h.cercania = clamp(h.cercania + 2); mod({ karma: -1 }); Historias.sembrar('hijo_problemas', { id: h.id }, R.int(3, 7)); }),
   ] }); } },
   { id: 'familiarDinero', edad: [25, 100], p: 0.05, cond: () => patrimonio() > 1e6, fn: p => { const m = Math.round(R.int(5000, 50000) * Math.max(eco(), 0.5)); Modal.mostrar({ ic: '🙏', titulo: 'Un pariente necesitado', texto: `<p>Un primo al que no ves hace años te pide ${fmt$(m)} para "un negocio seguro".</p>`, opciones: [
     op('Dárselo', () => { p.dinero -= m; mod({ karma: 3 }); log(`Le diste ${fmt$(m)} a tu primo.`); }),
     op('Negarme', () => mod({ karma: -1 })),
   ] }); } },
   { id: 'voluntariado', edad: [12, 90], p: 0.03, fn: p => Modal.mostrar({ ic: '🤲', titulo: 'Voluntariado', texto: '<p>Una ONG busca voluntarios para construir casas en una zona afectada por un huaico.</p>', opciones: [
-    op('Ofrecerme como voluntario', () => { mod({ karma: 6, felicidad: 5, salud: -1 }); log('Fuiste voluntari' + gx(p, 'o', 'a') + ' construyendo casas.', 'bueno'); }),
+    op('Ofrecerme como voluntario', () => { mod({ karma: 6, felicidad: 5, salud: -1 }); Historias.sembrar('voluntario', {}, R.int(8, 20)); log('Fuiste voluntari' + gx(p, 'o', 'a') + ' construyendo casas.', 'bueno'); }),
     op('Donar en lugar de ir', () => { const m = Math.round(100 * eco()); p.dinero -= m; p.cont.donado += m; mod({ karma: 2 }); }),
     op('No tengo tiempo', () => {}),
   ] }) },

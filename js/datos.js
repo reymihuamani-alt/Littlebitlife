@@ -263,4 +263,11 @@ const LOGROS = [
   { id:'generacion3',   ic:'🌳', n:'Árbol genealógico', d:'Juega 3 generaciones de una familia.' },
   { id:'objetivo',      ic:'🎯', n:'Misión cumplida', d:'Completa un objetivo de vida.' },
   { id:'reto',          ic:'🏵️', n:'Retador', d:'Completa un reto.' },
+  { id:'rasgo',         ic:'🧬', n:'Conócete a ti mismo', d:'Descubre uno de tus rasgos ocultos.' },
+  { id:'historia',      ic:'↩️', n:'El pasado vuelve', d:'Vive una historia que regresa de tu pasado.' },
+  { id:'legado',        ic:'🏛️', n:'Herencia eterna', d:'Compra tu primera mejora de legado.' },
+  { id:'detective',     ic:'🔎', n:'Detective', d:'Desenmascara a un asesino en serie.' },
+  { id:'sombra',        ic:'🌑', n:'Doble vida', d:'Cumple tu código por primera vez.' },
+  { id:'apodo',         ic:'📺', n:'Te bautizaron', d:'Los medios te ponen un apodo.' },
+  { id:'serie',         ic:'🎞️', n:'Basado en hechos reales', d:'Estrenan una serie sobre tu vida.' },
 ];

@@ -28,7 +28,7 @@ const Salud = {
     if (a.apuestas > 50 && p.dinero > 0) { const perd = Math.round(p.dinero * R.float(0.05, 0.2)); p.dinero -= perd; log(`🎰 Tu adicción al juego te costó ${fmt$(perd)} este año.`, 'malo'); }
     for (const k in a) a[k] = clamp(a[k] - 3);
     // Nuevas enfermedades
-    let prob = 0.045 + (e > 45 ? 0.04 : 0) + (e > 65 ? 0.07 : 0) + (st.salud < 40 ? 0.1 : 0) + (a.tabaco > 30 ? 0.06 : 0);
+    let prob = 0.045 + (Rasgos.tiene('fragil') ? 0.06 : 0) + (e > 45 ? 0.04 : 0) + (e > 65 ? 0.07 : 0) + (st.salud < 40 ? 0.1 : 0) + (a.tabaco > 30 ? 0.06 : 0);
     if (st.estres > 70 && R.chance(0.22)) this.contraer(R.pick(['Ansiedad', 'Insomnio', 'Depresión'])) && log('😰 El estrés te está pasando factura: te diagnosticaron un problema de salud mental.', 'malo');
     if (st.felicidad < 20 && R.chance(0.25)) this.contraer('Depresión') && log('🌧️ Te diagnosticaron depresión.', 'malo');
     if (R.chance(prob)) {

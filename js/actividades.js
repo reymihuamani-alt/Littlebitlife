@@ -25,11 +25,12 @@ const Actividades = {
         a('🩺', 'Médico', '', () => Salud.panel());
         return its;
       }
+      if (S.caso && S.caso.activo) { its.push({ sec: '🚨 Caso abierto' }); a('🔎', S.caso.apodo, `${S.caso.victimas} víctimas · ${S.caso.pistas.length} pistas`, () => Asesino.panelCaso()); }
       its.push({ sec: 'Cuerpo y mente' });
-      a('🏋️', 'Gimnasio', '+salud, +apariencia', () => { if (!usar('gym', 3)) return; mod({ salud: R.int(1, 3), apariencia: R.int(0, 2), estres: -3, felicidad: 1 }); if (R.chance(0.02)) { Salud.contraer('Lesión de rodilla'); log('Te lesionaste en el gimnasio.', 'malo'); } else log('Fuiste al gimnasio.'); }, e < 12 ? 'Desde los 12 años.' : false);
+      a('🏋️', 'Gimnasio', '+salud, +apariencia', () => { if (!usar('gym', 3)) return; mod({ salud: R.int(1, 3) + (Rasgos.tiene('atleta') ? 2 : 0), apariencia: R.int(0, 2), estres: -3, felicidad: 1 }); Rasgos.pista('atleta'); if (R.chance(0.02)) { Salud.contraer('Lesión de rodilla'); log('Te lesionaste en el gimnasio.', 'malo'); } else log('Fuiste al gimnasio.'); }, e < 12 ? 'Desde los 12 años.' : false);
       a('🏃', 'Salir a correr', '+salud', () => { if (!usar('correr', 3)) return; mod({ salud: R.int(1, 3), estres: -2 }); log('Saliste a correr.'); });
       a('🧘', 'Meditar', '−estrés, +felicidad', () => { if (!usar('meditar', 3)) return; mod({ estres: -R.int(4, 9), felicidad: 2 }); log('Meditaste un rato.'); }, e < 10 ? 'Desde los 10 años.' : false);
-      a('📚', 'Ir a la biblioteca', '+inteligencia', () => { if (!usar('biblio', 3)) return; mod({ inteligencia: R.int(1, 2) }); log('Pasaste la tarde en la biblioteca.'); });
+      a('📚', 'Ir a la biblioteca', '+inteligencia', () => { if (!usar('biblio', 3)) return; mod({ inteligencia: R.int(1, 2) + (Rasgos.tiene('genio') ? 1 : 0) }); Rasgos.pista('genio'); log('Pasaste la tarde en la biblioteca.'); });
       a('🥗', 'Seguir una dieta saludable', '+salud, +apariencia', () => { if (!usar('dieta', 1)) return; mod({ salud: 3, apariencia: 1, felicidad: -1 }); log('Seguiste una dieta saludable todo el año.'); }, e < 13 ? 'Desde los 13 años.' : false);
       a('🩺', 'Salud y médicos', 'Enfermedades, terapia, cirugía, rehabilitación', () => Salud.panel());
       its.push({ sec: 'Ocio' });

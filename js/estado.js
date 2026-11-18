@@ -49,7 +49,8 @@ const Estado = {
       esp: { modelo: null, actor: null, director: null, luchador: null, politica: null, org: null, realeza: null, astronauta: null, redes: null },
       objetivo: cfg.objetivo || 'libre', reto: cfg.reto || 'ninguno', objCumplido: false, retoCumplido: false,
       cont: { crimenes: 0, aniosCarcel: 0, fugas: 0, matrimonios: 0, parejas: 0, hijos: 0, donado: 0, viajes: 0, profesiones: [], cirugias: 0, peliculas: 0, sumaFel: 0, maxPatrimonio: 0, cargos: [] },
-      usos: {}, log: [], generacion: cfg.generacion || 1, dios: false, licencia: false, vistos: {},
+      usos: {}, log: [], generacion: cfg.generacion || 1, dios: false, licencia: false, vistos: {}, hilos: [],
+      rasgos: Rasgos.generar({ talento: Legado.tiene('talento'), vision: Legado.tiene('vision'), elegido: cfg.rasgo, heredados: cfg.heredados || [] }),
     };
     S = { v: 1, anio: cfg.anio || 2026, p, eco: { estado: 'normal', anios: 0 }, cine: { tendencias: {} }, dinastia: cfg.dinastia || { millonarios: [] } };
     Cine.nuevasTendencias();
@@ -84,6 +85,10 @@ const Estado = {
     if (nacidos.length) log(`Tienes ${nacidos.length} herman${nacidos.length > 1 ? 'os' : gx(nacidos[0], 'o', 'a')} mayor${nacidos.length > 1 ? 'es' : ''}: ${nacidos.map(h => h.nombre).join(', ')}.`);
     const ob = OBJETIVOS.find(o => o.id === p.objetivo);
     if (ob.id !== 'libre') log(`🎯 Meta de esta vida: <b>${ob.nombre}</b>. ${ob.desc}`, 'raro');
+    if (cfg.genes && p.st[cfg.genes] !== undefined) { p.st[cfg.genes] = clamp(p.st[cfg.genes] + 20); log(`🧬 Buenos genes: naciste con ${NOMBRE_STAT[cfg.genes].toLowerCase()} excepcional.`, 'raro'); }
+    const vistos = p.rasgos.filter(x => x.visto);
+    if (vistos.length) log(`🧬 Tus rasgos: ${vistos.map(x => `<b>${RASGOS_VIDA[x.id].ic} ${RASGOS_VIDA[x.id].n}</b>`).join(', ')}.`, 'raro');
+    if (p.rasgos.some(x => !x.visto)) log('❔ Tienes rasgos ocultos que descubrirás con los años.', 'gris');
     return S;
   },
 
@@ -100,7 +105,7 @@ const Estado = {
     const l = this.logros(); if (l.includes(id)) return;
     l.push(id); try { localStorage.setItem(CLAVE_LOGROS, JSON.stringify(l)); } catch (e) {}
     const lg = LOGROS.find(x => x.id === id);
-    if (lg) { log(`🏆 Logro desbloqueado: <b>${lg.n}</b>`, 'raro'); toast(`🏆 ${lg.n}`); }
+    if (lg) { log(`🏆 Logro desbloqueado: <b>${lg.n}</b>`, 'raro'); toast(`🏆 Logro: <b>${lg.n}</b>`); Efectos.vibrar(50); }
   },
 };
 

@@ -14,7 +14,9 @@ function mod(c) {
   const st = S.p.st;
   for (const k in c) {
     if (S.p.dios && S.p.diosBloq && S.p.diosBloq[k]) continue;
-    st[k] = clamp(Math.round((st[k] ?? 0) + c[k]));
+    const antes = st[k] ?? 0;
+    st[k] = clamp(Math.round(antes + c[k]));
+    if (typeof Efectos !== 'undefined') Efectos.registrar(k, st[k] - antes);
   }
 }
 function toast(msg) {
@@ -62,7 +64,7 @@ function render() {
   reg.scrollTop = reg.scrollHeight;
   // stats
   const keys = ['felicidad', 'salud', 'inteligencia', 'apariencia', 'estres', 'fama'];
-  $('#stats').innerHTML = keys.map(k => { const v = p.st[k]; return `<div class="stat"><div class="fila"><span>${NOMBRE_STAT[k]}</span><b>${v}%</b></div><div class="barra"><i style="width:${v}%;background:${colorStat(k, v)}"></i></div></div>`; }).join('');
+  $('#stats').innerHTML = keys.map(k => { const v = p.st[k]; return `<div class="stat" data-k="${k}"><div class="fila"><span>${NOMBRE_STAT[k]}</span><b>${v}%</b></div><div class="barra"><i style="width:${v}%;background:${colorStat(k, v)}"></i></div></div>`; }).join('');
   $('#nav-ocupacion').textContent = p.carcel ? 'Prisión' : (p.edad < 18 || p.edu.enCurso) && !p.trabajo ? 'Escuela' : 'Trabajo';
   document.querySelector('[data-nav="ocupacion"] span').textContent = p.carcel ? '⛓️' : (p.edad < 18 || p.edu.enCurso) && !p.trabajo ? '🎓' : '💼';
   $('#btn-edad').classList.toggle('muerto', !p.vivo);
@@ -102,7 +104,7 @@ const Panel = {
   reemplazar(titulo, fn) { this.pila.pop(); this.abrir(titulo, fn); },
   pintar() {
     const el = $('#panel');
-    if (!this.pila.length) { el.classList.add('oculto'); return; }
+    if (!this.pila.length) { el.classList.add('oculto'); if (this.alCerrar) { const f = this.alCerrar; this.alCerrar = null; f(); } return; }
     const top = this.pila[this.pila.length - 1];
     const titulo = typeof top.titulo === 'function' ? top.titulo() : top.titulo;
     const items = top.fn() || [];
@@ -132,6 +134,7 @@ const Panel = {
 function actualizar() {
   if (S && S.p && S.p.vivo && !Modal.activo) Objetivos.revisar();
   render(); Panel.pintar();
+  if (typeof Efectos !== 'undefined') Efectos.mostrar();
   if (S && !S.p.vivo && !Modal.activo) Vida.mostrarMuerte();
 }
 
@@ -145,6 +148,13 @@ const Modal = {
     this.activo = true; this.cfg = cfg; this.pintar(cfg);
   },
   pintar(cfg) {
+    $('#modal').className = cfg.clase || '';
+    if (cfg.espera) {
+      $('#modal').innerHTML = `<div class="m-ic">${cfg.ic || '⏳'}</div><h3>${cfg.titulo || ''}</h3><div class="puntos"><i></i><i></i><i></i></div>`;
+      $('#modal-fondo').classList.remove('oculto');
+      setTimeout(() => { if (this.cfg === cfg && this.activo) this.elegir({ fn: cfg.espera.fn }); }, cfg.espera.ms);
+      return;
+    }
     const ops = cfg.opciones && cfg.opciones.length ? cfg.opciones : [{ t: 'Aceptar' }];
     $('#modal').innerHTML = `${cfg.ic ? `<div class="m-ic">${cfg.ic}</div>` : ''}<h3>${cfg.titulo || ''}</h3><div class="m-tx">${cfg.texto || ''}${cfg.html || ''}</div><div class="m-ops">${ops.map((o, i) => `<button class="btn ${o.cls || (ops.length > 1 ? 'sec' : '')}" data-o="${i}" ${o.dis ? 'disabled' : ''}>${o.t}</button>`).join('')}</div>`;
     $('#modal-fondo').classList.remove('oculto');

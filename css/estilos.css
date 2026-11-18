@@ -148,3 +148,35 @@ label.campo input,label.campo select{display:block;width:100%;margin-top:4px;pad
 .lapida{text-align:center;font-size:64px;margin-top:10px}
 .cinta{display:inline-block;padding:6px 14px;border-radius:999px;background:var(--fama);color:#fff;font-weight:800;margin:6px 4px}
 .cinta.sec{background:var(--sup2);color:var(--txt);border:1px solid var(--borde);font-weight:600}
+
+/* ---------- Efectos: números flotantes, destellos, confeti ---------- */
+.chip{position:fixed;z-index:70;transform:translate(-50%,0);font-weight:800;font-size:14px;pointer-events:none;padding:2px 9px;border-radius:999px;background:var(--sup);box-shadow:var(--sombra);animation:subir 1.5s ease-out forwards;white-space:nowrap}
+.chip.ok{color:var(--ok)} .chip.mal{color:var(--mal)}
+@keyframes subir{0%{opacity:0;transform:translate(-50%,8px)}15%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px)}}
+.stat.flash-ok .barra{animation:brillo-ok .9s}
+.stat.flash-mal .barra{animation:brillo-mal .9s}
+@keyframes brillo-ok{30%{box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 45%,transparent)}}
+@keyframes brillo-mal{30%{box-shadow:0 0 0 3px color-mix(in srgb,var(--mal) 45%,transparent)}}
+.confeti{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+.confeti span{position:absolute;top:-30px;animation-name:caer;animation-timing-function:linear;animation-fill-mode:forwards}
+@keyframes caer{to{transform:translateY(110vh) rotate(600deg)}}
+.puntos{display:flex;justify-content:center;gap:8px;margin:16px 0 6px}
+.puntos i{width:10px;height:10px;border-radius:50%;background:var(--pri);animation:rebote 1s infinite ease-in-out}
+.puntos i:nth-child(2){animation-delay:.15s}.puntos i:nth-child(3){animation-delay:.3s}
+@keyframes rebote{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+#modal.celebra{border:3px solid #f5b301;box-shadow:0 0 0 6px color-mix(in srgb,#f5b301 25%,transparent),var(--sombra)}
+#modal.celebra .m-ic{font-size:56px;animation:latido 1.2s ease-in-out infinite}
+@keyframes latido{50%{transform:scale(1.12)}}
+#modal.urgente{border-top:6px solid var(--mal)}
+#modal.urgente h3{color:var(--mal);letter-spacing:.04em}
+#modal.historia{border-left:6px solid var(--fama)}
+
+/* ---------- Noticiero en el registro ---------- */
+.anio p.noticia{background:color-mix(in srgb,var(--mal) 8%,var(--sup));border-left:4px solid var(--mal);padding:6px 8px;border-radius:8px;margin:6px 0}
+.tv{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:#fff;background:var(--mal);padding:1px 6px;border-radius:4px;margin-right:4px;vertical-align:1px}
+
+/* ---------- Legado ---------- */
+.tarjeta.legado{border:2px solid #f5b301}
+.kv-l{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0;border-bottom:1px dashed var(--borde)}
+.kv-l b{color:var(--ok)}
+@media (prefers-reduced-motion: reduce){.chip,.confeti span,.puntos i,#modal.celebra .m-ic{animation-duration:.01s!important}}

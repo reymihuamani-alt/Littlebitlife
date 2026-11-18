@@ -116,7 +116,8 @@ const Cine = {
       opciones: [['Mínimo', 0.05], ['Normal', 0.25], ['Agresivo', 0.6]].map(([n, f]) => ({ t: `${n} — ${fmt$(pel.presupuesto * f)}`, fn: () => { pel.marketing = f; this.estrenar(pel); } })),
     });
   },
-  estrenar(pel) {
+  estrenar(pel, listo) {
+    if (!listo) return Efectos.suspenso('🍿 Se apagan las luces del estreno…', () => this.estrenar(pel, true), 1800, '🎬');
     const p = S.p, d = p.esp.director;
     const costoTotal = pel.presupuesto + pel.costoGuion + pel.actor.costo + pel.presupuesto * pel.marketing;
     if (!pel.estudio) {
@@ -124,7 +125,7 @@ const Cine = {
       p.dinero -= costoTotal;
     }
     const tend = S.cine.tendencias[pel.genero] ?? 1;
-    const calidad = clamp(pel.guion * 0.42 + pel.actor.talento * 0.2 + d.habilidad * 0.33 + R.int(-12, 12) + (pel.presupuesto >= 2e7 ? 4 : 0));
+    const calidad = clamp(pel.guion * 0.42 + pel.actor.talento * 0.2 + d.habilidad * 0.33 + (Rasgos.tiene('artista') ? 6 : 0) + R.int(-12, 12) + (pel.presupuesto >= 2e7 ? 4 : 0));
     const nota = clamp(calidad / 10 + R.float(-0.4, 0.4), 1, 10);
     let mult = Math.pow(0.25 + calidad / 48, 2.2) * tend * (0.7 + pel.marketing) * (0.65 + pel.actor.fama / 110) * R.float(0.55, 1.5);
     if (pel.genero === 'Terror' || pel.genero === 'Documental') mult *= pel.presupuesto <= 2e6 ? 1.6 : 0.85;
@@ -162,6 +163,8 @@ const Cine = {
           f.premio = true; d.estatuillas++; d.reputacion = clamp(d.reputacion + 20);
           mod({ fama: 20, felicidad: 20 });
           log(`🏆🏆 ¡<b>${esc(f.titulo)}</b> GANÓ la Estatuilla Dorada a Mejor Película!`, 'raro');
+          Efectos.celebrar('🏆', '¡Estatuilla Dorada!', `<p><b>${esc(f.titulo)}</b> ganó Mejor Película. Subes al escenario temblando…</p>`);
+          Noticias.emitir(`«${esc(f.titulo)}», de ${p.nombre} ${p.apellido}, gana la Estatuilla Dorada a Mejor Película.`);
           Estado.darLogro('estatuilla');
         } else log('No ganó, pero la nominación aumentó tu prestigio.', 'gris');
       }

@@ -290,7 +290,7 @@ const Negocios = {
           p.dinero -= v;
           p.negocios.push({ id: uid(), nombre, sector: s.id, sectorN: s.n, ic: s.ic, capital: v, valor: v, empleados: Math.max(1, Math.round(v / 150000)), calidad: R.int(35, 60), marketing: 20, anios: 0, ultimaGanancia: 0, publico: false, participacion: 1, reinversion: 0.5 });
           log(`🏪 Fundaste <b>${esc(nombre)}</b> (${s.n}) con ${fmt$(v)}.`, 'bueno');
-          Estado.darLogro('empresario'); mod({ felicidad: 6, estres: 6 });
+          Estado.darLogro('empresario'); mod({ felicidad: 6, estres: 6 }); Rasgos.pista('emprendedor');
           Panel.cerrar();
         } });
       } }, { t: 'Cancelar' }],
@@ -330,7 +330,7 @@ const Negocios = {
       const nec = this.necesarios(n);
       const falta = Math.max(0, nec - n.empleados) / nec, sobra = Math.max(0, n.empleados - nec * 1.3);
       let r = s.margen + (n.calidad - 50) / 260 + (n.marketing - 30) / 450 - falta * 0.15 + (S.eco.estado === 'recesion' ? -0.09 : S.eco.estado === 'auge' ? 0.05 : 0) + R.normal(0, s.riesgo * 0.3);
-      r += Math.min(0.06, (p.st.inteligencia - 50) / 800);
+      r += Math.min(0.06, (p.st.inteligencia - 50) / 800) + (Rasgos.tiene('emprendedor') ? 0.04 : 0);
       let g = Math.round(n.capital * r * s.escala * 0.8 - sobra * 28000 * eco());
       if (n.sector === 'startup' && n.calidad >= 55 && R.chance(0.08)) {
         const x = R.float(3, 12); n.valor = Math.round(n.valor * x);

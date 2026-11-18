@@ -95,9 +95,10 @@ const Politica = {
       opciones: R.shuffle(deb.o).map(([t, v]) => ({ t, fn: () => { cam.debate = v * (cam.preocupaciones.includes(deb.tema) ? 1.5 : 1); this.resultado(id, cam); } })),
     });
   },
-  resultado(id, cam) {
+  resultado(id, cam, listo) {
+    if (!listo) return Efectos.suspenso('🗳️ Contando los votos…', () => this.resultado(id, cam, true), 1800, '🗳️');
     const p = S.p, c = CARGOS[id], po = this.estado();
-    let prob = 0.36 + cam.coinc * 0.12 + cam.gasto + cam.debate * 0.05 + (p.st.fama - 30) / 260 + (p.st.inteligencia - 50) / 400 + (p.st.karma - 50) / 600 + (p.st.apariencia - 50) / 600 - c.dif - po.sobornos * 0.03 - (p.antecedentes ? 0.1 : 0);
+    let prob = 0.36 + (Rasgos.tiene('carisma') ? 0.07 : 0) + cam.coinc * 0.12 + cam.gasto + cam.debate * 0.05 + (p.st.fama - 30) / 260 + (p.st.inteligencia - 50) / 400 + (p.st.karma - 50) / 600 + (p.st.apariencia - 50) / 600 - c.dif - po.sobornos * 0.03 - (p.antecedentes ? 0.1 : 0);
     if (cam.reeleccion) prob += (po.aprobacion - 50) / 120;
     prob = clamp(prob * 100, 3, 92) / 100;
     const gano = R.chance(prob);
@@ -110,7 +111,8 @@ const Politica = {
       mod({ fama: c.nivel * 6, felicidad: 15 });
       log(`🗳️ ¡GANASTE la elección a <b>${c.n}</b> con el ${pct}% de los votos!`, 'raro');
       if (id === 'presidente') Estado.darLogro('presidente');
-      aviso('¡Victoria!', `<p>Obtuviste el <b>${pct}%</b> de los votos. ¡Eres ${c.n}!</p>`, '🎉');
+      Efectos.celebrar('🎉', '¡Victoria!', `<p>Obtuviste el <b>${pct}%</b> de los votos. ¡Eres ${c.n}!</p>`);
+      if (c.nivel >= 2) Noticias.emitir(`${p.nombre} ${p.apellido} gana la elección y será ${c.n} con el ${pct}% de los votos.`);
     } else {
       if (cam.reeleccion) { po.cargo = null; po.mandato = 0; }
       mod({ felicidad: -12 });
@@ -145,6 +147,7 @@ const Politica = {
     if (po.sobornos && R.chance(0.12 * po.sobornos)) {
       po.aprobacion = clamp(po.aprobacion - 25); mod({ fama: 5, felicidad: -15 });
       log('📰 ¡ESCÁNDALO! La prensa reveló tus sobornos.', 'malo');
+      Noticias.emitir(`Escándalo: revelan que ${CARGOS[po.cargo].n} ${p.nombre} ${p.apellido} recibió sobornos.`, { modal: true, ic: '📰' });
       if (R.chance(0.35)) { po.cargo = null; Crimen.arrestar('corrupción de funcionarios', [3, 9]); return 0; }
     }
     if (po.aprobacion < 12 && R.chance(0.4)) { log(`Masivas protestas te obligaron a renunciar como ${c.n}.`, 'malo'); po.cargo = null; return 0; }

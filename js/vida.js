@@ -26,8 +26,13 @@ const Vida = {
     Finanzas.anual(ingreso);
     if (p.vivo) Salud.anual();
     if (p.vivo) this.hitos();
+    if (p.vivo) Rasgos.anual();
+    if (p.vivo) Sombra.anual();
     p.cont.sumaFel += p.st.felicidad; p.cont.anios++;
     p.usos = {};
+    if (p.vivo) Noticias.anual();
+    if (p.vivo) Asesino.anual();
+    if (p.vivo) Historias.anual();
     if (p.vivo) Eventos.anual();
     if (p.vivo) this.chequeoMuerte();
     Objetivos.revisar();
@@ -47,6 +52,7 @@ const Vida = {
   hitos() {
     const p = S.p;
     if (p.edad === 16 && !p.licencia) log('🪪 Ya tienes edad para sacar la licencia de conducir (Actividades).', 'gris');
+    if (p.edad === 18 && Legado.tiene('fondo')) { const f = Math.round(25000 * Math.max(eco(), 0.5)); p.dinero += f; log(`🏦 Recibiste ${fmt$(f)} del fondo familiar que dejaron tus antepasados.`, 'bueno'); }
     if (p.edad === 18) {
       log('🎂 ¡Cumpliste 18! Ya eres mayor de edad.', 'info');
       const pa = personas('padre', 'madre');
@@ -68,7 +74,7 @@ const Vida = {
     }
     const ajuste = 78 - pais().esperanza;
     const factor = st.salud < 20 ? 4 : st.salud < 40 ? 2 : st.salud < 60 ? 1.25 : st.salud > 85 ? 0.6 : 1;
-    let q = Math.exp(-10.6 + 0.095 * (p.edad + ajuste)) * factor;
+    let q = Math.exp(-10.6 + 0.095 * (p.edad + ajuste)) * factor * (Rasgos.tiene('longevo') ? 0.6 : 1);
     if (p.edad < 5) q = 0.0008;
     if (p.adic.alcohol > 70) q *= 1.5;
     if (R.chance(q)) {
@@ -80,9 +86,16 @@ const Vida = {
   morir(causa) {
     const p = S.p;
     if (!p.vivo) return;
+    if (Legado.tiene('segunda') && !p.cont.segundaUsada && p.edad < 100) {
+      p.cont.segundaUsada = true; p.st.salud = Math.max(p.st.salud, 35);
+      log(`💫 Estuviste a punto de morir por ${causa}… pero sobreviviste milagrosamente.`, 'raro');
+      Efectos.celebrar('💫', 'Segunda oportunidad', `<p>Los médicos no se lo explican: deberías haber muerto por ${causa}.</p><p class="nota">Tu mejora de legado se consumió en esta vida.</p>`);
+      return;
+    }
     p.vivo = false; p.causa = causa;
     log(`🪦 <b>Moriste a los ${p.edad} años</b> por ${causa}.`, 'malo');
     Objetivos.revisar(true);
+    Legado.registrarMuerte();
     Estado.guardar();
   },
 
@@ -115,6 +128,7 @@ const Vida = {
         <span class="cinta">${cintas[0].ic} ${cintas[0].n}</span><p class="nota">${cintas[0].d}</p>
         ${cintas.slice(1).map(c => `<span class="cinta sec">${c.ic} ${c.n}</span>`).join('')}</div>
       ${hs.length ? `<div class="tarjeta"><h3>Continuar con tu descendencia</h3><p class="nota">Tu patrimonio se reparte entre tus herederos (10% de impuesto a la herencia).</p>${hs.map(h => `<button class="btn sec" data-hijo="${h.id}">${Relaciones.icono(h)} Continuar como ${esc(h.nombre)} (${h.edad} años)</button>`).join('')}</div>` : ''}
+      ${this.htmlLegado()}
       <button class="btn ok" id="btn-nueva">✨ Empezar una nueva vida</button>
       <button class="btn sec" id="btn-ver-vida">📜 Ver el registro de esta vida</button>
     </div>`;
@@ -122,7 +136,15 @@ const Vida = {
     el.scrollTop = 0;
     el.querySelectorAll('[data-hijo]').forEach(b => b.onclick = () => this.continuarComo(hs.find(h => h.id === b.dataset.hijo)));
     $('#btn-nueva').onclick = () => { Estado.borrar(); Inicio.mostrar(); };
+    if ($('#btn-legado')) $('#btn-legado').onclick = () => Legado.panel();
+    if (this._legadoAnimado !== p) { this._legadoAnimado = p; Efectos.vibrar([30, 50, 30]); }
     $('#btn-ver-vida').onclick = () => { el.classList.add('oculto'); el.dataset.modo = 'revision'; $('#app').classList.remove('oculto'); toast('Toca ＋ para volver a la pantalla final.'); };
+  },
+  htmlLegado() {
+    const p = S.p, lg = p.legado || Legado.registrarMuerte(), l = Legado.cargar();
+    return `<div class="tarjeta legado"><h3>🏛️ Legado ganado: +${lg.pts} puntos</h3>${lg.detalle.map(([t, v]) => `<div class="kv-l"><span>${t}</span><b>+${v}</b></div>`).join('')}
+      <p class="nota">Total disponible: <b>${l.puntos}</b> puntos · Colección: ${l.cintas.length}/${CINTAS.length} cintas</p>
+      <button class="btn sec" id="btn-legado">🏛️ Gastar puntos de legado</button></div>`;
   },
   ultimaOcupacion() {
     const p = S.p, e = p.esp;
@@ -151,7 +173,8 @@ const Vida = {
       ic: '🌳', titulo: `La vida de ${h.nombre}`, texto: `<p>Heredarás aproximadamente <b>${fmt$(parte)}</b>. Elige el objetivo para esta nueva vida:</p>`,
       opciones: OBJETIVOS.map(o => ({ t: `${o.ic} ${o.nombre}`, fn: () => {
         const clase = parte > 5e6 ? 'rica' : parte > 2e5 ? 'alta' : viejo.clase === 'pobre' && parte < 2e4 ? 'pobre' : 'media';
-        Estado.nuevaVida({ nombre: h.nombre, apellido: h.apellido, genero: h.genero, pais: viejo.pais, objetivo: o.id, reto: 'ninguno', generacion: viejo.generacion + 1, anio, dinastia, clase });
+        const heredados = (viejo.rasgos || []).map(x => x.id).filter(id => HEREDABLES.includes(id) && R.chance(0.4));
+        Estado.nuevaVida({ nombre: h.nombre, apellido: h.apellido, genero: h.genero, pais: viejo.pais, objetivo: o.id, reto: 'ninguno', generacion: viejo.generacion + 1, anio, dinastia, clase, heredados });
         const p = S.p;
         p.edad = Math.max(0, h.edad); p.clase = clase;
         p.st.apariencia = h.apa; p.st.inteligencia = h.int; p.st.felicidad = clamp(h.cercania - 20); p.st.salud = R.int(60, 100);

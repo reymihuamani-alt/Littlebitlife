@@ -121,7 +121,7 @@ const Minijuegos = {
   apuesta(fn) {
     const p = S.p;
     if (!usar('casino', 6)) return;
-    Modal.numero({ ic: '💵', titulo: '¿Cuánto apuestas?', min: 1, max: Math.max(1, p.dinero), valor: Math.max(1, Math.round(p.dinero * 0.05)), etiqueta: 'Apostar', fn: v => { if (v <= 0 || v > p.dinero) return; p.adic.apuestas = clamp(p.adic.apuestas + 6); fn(v); } });
+    Modal.numero({ ic: '💵', titulo: '¿Cuánto apuestas?', min: 1, max: Math.max(1, p.dinero), valor: Math.max(1, Math.round(p.dinero * 0.05)), etiqueta: 'Apostar', fn: v => { if (v <= 0 || v > p.dinero) return; p.adic.apuestas = clamp(p.adic.apuestas + 6); Rasgos.pista('adictivo'); fn(v); } });
   },
   pagarApuesta(v, mult, txt) {
     const p = S.p, g = Math.round(v * mult) - v;
@@ -172,8 +172,8 @@ const Minijuegos = {
       if (!usar('loteria', 3)) return;
       p.dinero -= precio * n;
       let premio = 0, mayor = false;
-      for (let i = 0; i < n; i++) { const x = Math.random(); if (x < 1 / 1500000) { premio += Math.round(15e6 * Math.max(eco(), 0.4) * R.float(0.6, 2)); mayor = true; } else if (x < 1 / 6000) premio += precio * 1000; else if (x < 1 / 60) premio += precio * 10; }
-      if (mayor) { p.dinero += premio; mod({ felicidad: 30, fama: 10 }); log(`🎉🎉 ¡GANASTE EL PREMIO MAYOR DE LA LOTERÍA: ${fmt$(premio)}!`, 'raro'); Estado.darLogro('loteria'); aviso('¡¡PREMIO MAYOR!!', `<p>Ganaste <b>${fmt$(premio)}</b>.</p><p class="nota">Cuidado: familiares lejanos ya empiezan a llamarte…</p>`, '🤑'); }
+      for (let i = 0; i < n; i++) { const x = Math.random(); if (x < (Rasgos.tiene('suerte') ? 10 : 1) / 1500000) { premio += Math.round(15e6 * Math.max(eco(), 0.4) * R.float(0.6, 2)); mayor = true; } else if (x < 1 / 6000) premio += precio * 1000; else if (x < 1 / 60) premio += precio * 10; }
+      if (mayor) { p.dinero += premio; mod({ felicidad: 30, fama: 10 }); log(`🎉🎉 ¡GANASTE EL PREMIO MAYOR DE LA LOTERÍA: ${fmt$(premio)}!`, 'raro'); Estado.darLogro('loteria'); Efectos.celebrar('🤑', '¡¡PREMIO MAYOR!!', `<p>Ganaste <b>${fmt$(premio)}</b>.</p><p class="nota">Cuidado: familiares lejanos ya empiezan a llamarte…</p>`); Noticias.emitir(`¡Un afortunado de ${ciudad()} gana el premio mayor de la lotería!`); }
       else if (premio) { p.dinero += premio; log(`🎟️ Ganaste ${fmt$(premio)} en la lotería.`, 'bueno'); toast(`🎟️ +${fmt$(premio)}`); }
       else { log(`Compraste ${n} boleto${n > 1 ? 's' : ''} de lotería. Nada.`); toast('Sin premio.'); }
     } })).concat([{ t: 'Cancelar' }]) });

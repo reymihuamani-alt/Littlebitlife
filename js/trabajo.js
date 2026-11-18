@@ -58,7 +58,7 @@ const Trabajo = {
       ic: '🤝', titulo: `Entrevista: ${d.niveles[0]}`, texto: `<p>El entrevistador pregunta:</p><p><b>"${pr.q}"</b></p>`,
       opciones: R.shuffle(pr.o).map(([t, v]) => ({ t, fn: () => {
         const dific = d.cat === 'Universitario' ? 0.05 : d.cat === 'Especial' ? 0.1 : -0.05;
-        let prob = 0.42 + v * 0.22 + (p.st.inteligencia - 50) / 220 + (p.st.apariencia - 50) / 350 - dific + (p.expTrab[d.id] ? 0.15 : 0) - (p.antecedentes ? 0.12 : 0) - (S.eco.estado === 'recesion' ? 0.12 : 0) - (p.edad > 55 ? 0.15 : 0);
+        let prob = 0.42 + v * 0.22 + (Rasgos.tiene('carisma') ? 0.1 : 0) + (p.st.inteligencia - 50) / 220 + (p.st.apariencia - 50) / 350 - dific + (p.expTrab[d.id] ? 0.15 : 0) - (p.antecedentes ? 0.12 : 0) - (S.eco.estado === 'recesion' ? 0.12 : 0) - (p.edad > 55 ? 0.15 : 0);
         if (R.chance(clamp(prob * 100, 5, 92) / 100)) this.contratar(d);
         else { log(`No te contrataron como ${d.niveles[0]}.`, 'malo'); mod({ felicidad: -4 }); aviso('No fue esta vez', `<p>"Gracias por tu tiempo. Hemos decidido seguir con otros candidatos."</p>${S.eco.estado === 'recesion' ? '<p class="nota">La recesión hace que haya menos vacantes.</p>' : ''}`, '📭'); }
       } })),
@@ -74,6 +74,7 @@ const Trabajo = {
     p.medioTiempo = null;
     if (!p.cont.profesiones.includes(d.id)) p.cont.profesiones.push(d.id);
     log(`💼 ¡Te contrataron como <b>${d.niveles[p.trabajo.nivel]}</b>! Sueldo: ${fmt$(this.salario())}/año.`, 'bueno');
+    Efectos.celebrar(d.ic, '¡Te contrataron!', `<p>Nuevo puesto: <b>${d.niveles[p.trabajo.nivel]}</b></p><p>Sueldo: ${fmt$(this.salario())} al año.</p>`);
     mod({ felicidad: 8 });
     Estado.darLogro('primerTrabajo');
     Panel.cerrar();
@@ -94,6 +95,7 @@ const Trabajo = {
     const p = S.p, t = p.trabajo, d = this.def(t.id);
     t.nivel++; t.anios = 0; t.desempeno = clamp(t.desempeno - 15);
     log(`📈 ${motivo || '¡Te ascendieron!'} Ahora eres <b>${d.niveles[t.nivel]}</b> (${fmt$(this.salario())}/año).`, 'bueno');
+    Efectos.celebrar('📈', '¡Ascenso!', `<p>${motivo || ''}</p><p>Ahora eres <b>${d.niveles[t.nivel]}</b>.</p><p>Nuevo sueldo: ${fmt$(this.salario())} al año.</p>`);
     mod({ felicidad: 10 });
     if (d.id === 'ejecutivo' && t.nivel === 4) Estado.darLogro('ceo');
   },
@@ -121,7 +123,7 @@ const Trabajo = {
     t.desempeno = clamp(t.desempeno + R.int(-7, 5) + (p.st.inteligencia - 55) / 15 + (p.st.felicidad - 50) / 25 - (p.st.estres > 75 ? 6 : 0) - (p.st.salud < 30 ? 6 : 0));
     mod({ estres: (ESTRES_TRABAJO[t.id] || 3) + t.nivel - 4 });
     // Ascenso automático
-    if (t.nivel < d.niveles.length - 1 && t.desempeno > 80 && t.anios >= 2 && this.puedeNivel(d, t.nivel + 1) && R.chance(0.3)) this.ascender('¡Tu jefe reconoció tu gran trabajo!');
+    if (t.nivel < d.niveles.length - 1 && t.desempeno > 80 && t.anios >= 2 && this.puedeNivel(d, t.nivel + 1) && R.chance(Rasgos.tiene('lider') ? 0.45 : 0.3)) this.ascender('¡Tu jefe reconoció tu gran trabajo!');
     // Despidos
     if (t.desempeno < 15 && R.chance(0.55)) { this.dejar(`🔥 Te despidieron de tu trabajo como ${d.niveles[t.nivel]} por bajo desempeño.`, 'malo'); mod({ felicidad: -15 }); }
     else if (S.eco.estado === 'recesion' && R.chance(0.07 + (t.desempeno < 40 ? 0.1 : 0))) { this.dejar(`📉 Por la recesión, la empresa hizo recortes y te despidieron.`, 'malo'); mod({ felicidad: -12, estres: 8 }); }
@@ -161,7 +163,7 @@ const Trabajo = {
     if (!usar('ascenso', 1)) return;
     const motivo = this.motivoNivel(d, t.nivel + 1);
     if (motivo) return aviso('Ascenso imposible', `<p>${motivo}</p>`, '🚫');
-    const prob = (t.desempeno - 40) / 60 + Math.min(t.anios, 4) * 0.06 - t.nivel * 0.04;
+    const prob = (t.desempeno - 40) / 60 + Math.min(t.anios, 4) * 0.06 - t.nivel * 0.04 + (Rasgos.tiene('lider') ? 0.12 : 0); Rasgos.pista('lider');
     if (t.anios >= 1 && R.chance(clamp(prob * 100, 3, 90) / 100)) this.ascender('¡Te dieron el ascenso que pediste!');
     else { t.desempeno = clamp(t.desempeno - 4); log('Pediste un ascenso pero te dijeron que aún no.', 'malo'); aviso('Todavía no', `<p>"Sigue esforzándote${t.anios < 1 ? ', acabas de empezar en este puesto' : ''}."</p>`, '⏳'); }
   },

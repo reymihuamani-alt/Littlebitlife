@@ -12,7 +12,7 @@ const Crimen = {
       its.push({ sec: 'Delitos' });
       for (const c of CRIMENES) its.push({ ic: c.ic, t: c.n, s: `Éxito base ${Math.round(c.exito * 100)}% · pena ${c.pena[0]}-${c.pena[1]} años`, dis: p.edad < c.edad ? `Debes tener al menos ${c.edad} años.` : c.int && p.st.inteligencia < c.int ? `Necesitas inteligencia ${c.int}%.` : false, fn: () => this.cometer(c) });
       if (p.edad >= 14) its.push({ ic: '👊', t: 'Pelea callejera', s: 'Gana respeto en la calle', fn: () => this.peleaCallejera() });
-      if (p.edad >= 18) { its.push({ sec: 'Crimen organizado' }); its.push({ ic: '🕶️', t: p.esp.org && p.esp.org.activo ? `La organización: ${RANGOS_ORG[p.esp.org.rango]}` : 'Entrar al crimen organizado', s: p.esp.org && p.esp.org.activo ? `Respeto ${p.esp.org.respeto} · calor policial ${p.esp.org.calor}%` : 'La ruta del menudeo a capo', fn: () => this.panelOrg(), cls: p.esp.org && p.esp.org.activo ? 'destacado' : '' }); }
+      if (p.edad >= 18) { its.push({ sec: 'Crimen organizado' }); its.push({ ic: '🕶️', t: p.esp.org && p.esp.org.activo ? `La organización: ${RANGOS_ORG[p.esp.org.rango]}` : 'Entrar al crimen organizado', s: p.esp.org && p.esp.org.activo ? `Respeto ${p.esp.org.respeto} · calor policial ${p.esp.org.calor}%` : 'La ruta del menudeo a capo', fn: () => this.panelOrg(), cls: p.esp.org && p.esp.org.activo ? 'destacado' : '' }); its.push({ ic: '🌑', t: 'Doble vida', s: p.esp.sombra && p.esp.sombra.activo ? `${p.esp.sombra.victimas} casos · sospecha ${p.esp.sombra.sospecha}%` : 'Un justiciero con código… al estilo de una serie', fn: () => Sombra.panel(), cls: p.esp.sombra && p.esp.sombra.activo ? 'destacado' : '' }); }
       return its;
     });
   },
@@ -20,7 +20,8 @@ const Crimen = {
     const p = S.p;
     if (!usar('crimen_' + c.id, 2)) return;
     const bonus = p.esp.org && p.esp.org.activo ? p.esp.org.rango * 0.03 : 0;
-    const prob = c.exito + (p.st.inteligencia - 50) / 400 + bonus + (p.st.salud - 50) / 600;
+    const prob = c.exito + (p.st.inteligencia - 50) / 400 + bonus + (p.st.salud - 50) / 600 + (Rasgos.tiene('frio') ? 0.08 : 0) + (Rasgos.tiene('suerte') ? 0.05 : 0);
+    Rasgos.pista('frio');
     p.cont.crimenes++; mod({ karma: c.karma });
     if (R.chance(prob)) {
       const b = Math.round(R.int(c.botin[0], c.botin[1]) * Math.max(eco(), 0.4));
@@ -36,7 +37,8 @@ const Crimen = {
     const p = S.p;
     if (!usar('peleaCalle', 1)) return;
     const rival = { nombre: `${R.pick(NOMBRES.M)} "${R.pick(['el Loco', 'Puños', 'el Chato', 'la Roca', 'el Flaco'])}"`, fuerza: R.int(30, 75) };
-    Minijuegos.pelea({ titulo: '👊 Pelea callejera', rival, poder: p.st.salud * 0.6 + (p.esp.luchador ? p.esp.luchador.entreno * 0.5 : 10), alFin: gano => {
+    Minijuegos.pelea({ titulo: '👊 Pelea callejera', rival, poder: p.st.salud * 0.6 + (p.esp.luchador ? p.esp.luchador.entreno * 0.5 : 10) + (Rasgos.tiene('atleta') ? 12 : 0), alFin: gano => {
+      Rasgos.pista('atleta'); Rasgos.pista('temperamental');
       mod({ karma: -3 });
       if (gano) { mod({ felicidad: 4 }); if (p.esp.org) p.esp.org.respeto += 4; log(`👊 Le ganaste una pelea callejera a ${rival.nombre}.`, 'raro'); }
       else { mod({ salud: -R.int(5, 15), felicidad: -5 }); log(`👊 ${rival.nombre} te dio una paliza.`, 'malo'); }
@@ -67,11 +69,12 @@ const Crimen = {
     ];
     Modal.mostrar({ ic: '⚖️', titulo: 'Te acusan de ' + delito, texto: `<p>Vas a juicio. Antecedentes previos: <b>${p.antecedentes}</b> (aumentan la condena). ¿Quién te defiende?</p>`, opciones: ops });
   },
-  juicio(delito, pena, probAbsuelto) {
+  juicio(delito, pena, probAbsuelto, listo) {
+    if (!listo) return Efectos.suspenso('⚖️ El jurado delibera…', () => this.juicio(delito, pena, probAbsuelto, true), 1600, '⚖️');
     const p = S.p;
     if (R.chance(probAbsuelto - p.antecedentes * 0.04)) {
       log(`⚖️ ¡Fuiste declarad${gx(p, 'o', 'a')} inocente de ${delito}!`, 'bueno'); mod({ felicidad: 10 });
-      return aviso('¡Inocente!', '<p>El jurado te declaró no culpable.</p>', '🎉');
+      return Efectos.celebrar('🎉', '¡Inocente!', '<p>El jurado te declaró no culpable.</p>');
     }
     let anios = R.int(pena[0], pena[1]) + Math.min(10, p.antecedentes);
     if (probAbsuelto > 0.5) anios = Math.max(pena[0], anios - 2);
@@ -93,6 +96,7 @@ const Crimen = {
     const pa = pareja(); if (pa && pa.tipo === 'pareja' && R.chance(0.5)) { pa.tipo = 'ex'; log(`💔 ${pa.nombre} te dejó al enterarse de tu condena.`, 'malo'); }
     if (p.esp.org && p.esp.org.activo) { p.esp.org.activo = false; p.esp.org.operacion = 0; p.esp.org.dineroSucio = Math.round(p.esp.org.dineroSucio * 0.2); log('La organización siguió sin ti y la policía incautó casi todo tu dinero sucio.', 'malo'); }
     mod({ felicidad: -25, estres: 15, fama: p.st.fama > 30 ? 5 : 0 });
+    if (p.st.fama >= 40) Noticias.emitir(`${p.nombre} ${p.apellido} es condenad${gx(p, 'o', 'a')} a ${anios} años de prisión por ${delito}.`);
     log(`⛓️ Te condenaron a <b>${anios} año${anios > 1 ? 's' : ''}</b> de ${juvenil ? 'centro juvenil' : 'prisión'} por ${delito}.`, 'malo');
     Estado.darLogro('carcel');
     aviso('Sentencia', `<p>${anios} año${anios > 1 ? 's' : ''} de ${juvenil ? 'internamiento en un centro juvenil' : 'prisión'}.</p>`, '⛓️');
@@ -134,6 +138,7 @@ const Crimen = {
         p.cont.fugas++; p.carcel = null; p.fugitivo = true;
         p.vivienda = 'alquiler';
         log('🏃 ¡TE FUGASTE DE PRISIÓN! Ahora eres prófug' + gx(p, 'o', 'a') + ' de la justicia.', 'raro');
+        Noticias.emitir(`Se fuga un recluso del penal de ${ciudad()}: ${p.nombre} ${p.apellido}. La policía pide ayuda a la ciudadanía.`);
         Estado.darLogro('fuga'); mod({ felicidad: 20, estres: 15 });
         aviso('¡Libre!', '<p>Escapaste. Pero la policía te busca: cada año hay riesgo de que te recapturen.</p>', '🏃');
       } else {

@@ -136,7 +136,7 @@ const Carreras = {
       opciones: [{ t: '📷 ¡Posar!', cls: 'ok', fn: () => {
         const a = +leerSelector('s-act'), b = +leerSelector('s-pos'), c = +leerSelector('s-est');
         const aciertos = (a === obj.actitud) + (b === obj.pose) + (c === obj.estilo);
-        const prob = 0.12 + aciertos * 0.26 + (p.st.apariencia - 60) / 160 - m.nivel * 0.03;
+        const prob = 0.12 + aciertos * 0.26 + (p.st.apariencia - 60) / 160 - m.nivel * 0.03 + (Rasgos.tiene('belleza') ? 0.08 : 0); Rasgos.pista('belleza');
         if (R.chance(clamp(prob * 100, 3, 95) / 100)) {
           const pago = Math.round(PAGO_MODELO[m.nivel] * R.float(0.7, 1.3) * Math.max(0.6, eco()));
           p.dinero += pago; m.prestigio += 1 + aciertos; m.campanias++;
@@ -157,7 +157,7 @@ const Carreras = {
     while (m.nivel < 4 && m.prestigio >= UMB_MODELO[m.nivel + 1]) {
       m.nivel++; m.nivelN = NIV_MODELO[m.nivel];
       log(`🌟 ¡Subiste de nivel! Ahora eres <b>${m.nivelN}</b>.`, 'raro');
-      if (m.nivel === 4) { Estado.darLogro('supermodelo'); mod({ fama: 15 }); }
+      if (m.nivel === 4) { Estado.darLogro('supermodelo'); mod({ fama: 15 }); Efectos.celebrar('📸', '¡Supermodelo!', '<p>Eres la cara de las marcas más importantes del mundo.</p>'); Noticias.emitir(`${S.p.nombre} ${S.p.apellido} es la nueva supermodelo del momento.`); }
     }
   },
 
@@ -191,7 +191,7 @@ const Carreras = {
     const tipoProd = ['un comercial', 'una telenovela', 'una serie de streaming', 'una película independiente', 'una superproducción'][a.nivel];
     const op = (id, t) => ({ t, fn: () => {
       const pts = id === esc.best ? 2 : id === esc.ok ? 1 : 0;
-      const prob = 0.15 + pts * 0.27 + (p.st.apariencia - 50) / 220 + p.st.fama / 300 - a.nivel * 0.04;
+      const prob = 0.15 + pts * 0.27 + (p.st.apariencia - 50) / 220 + p.st.fama / 300 - a.nivel * 0.04 + (Rasgos.tiene('artista') ? 0.08 : 0); Rasgos.pista('artista');
       if (R.chance(clamp(prob * 100, 4, 92) / 100)) {
         const pago = Math.round(PAGO_ACTOR[a.nivel] * R.float(0.7, 1.4) * Math.max(0.5, eco()));
         p.dinero += pago; a.prestigio += 1 + pts; a.papeles++;
@@ -220,7 +220,7 @@ const Carreras = {
       ];
     });
   },
-  poderLucha() { const p = S.p, l = p.esp.luchador; return p.st.salud * 0.45 + (l ? l.entreno : 0) * 0.55 - Math.max(0, p.edad - 32) * 1.5; },
+  poderLucha() { const p = S.p, l = p.esp.luchador; return p.st.salud * 0.45 + (l ? l.entreno : 0) * 0.55 - Math.max(0, p.edad - 32) * 1.5 + (Rasgos.tiene('atleta') ? 12 : 0); },
   pelearMMA() {
     const p = S.p, l = p.esp.luchador;
     if (p.st.salud < 30) return toast('Estás demasiado lastimad' + gx(p, 'o', 'a') + ' para pelear.');
@@ -235,7 +235,7 @@ const Carreras = {
         if (gano) {
           l.g++; p.dinero += bolsa; mod({ fama: titulo ? 12 : 2, felicidad: 8 });
           if (l.campeon) { l.defensas++; log(`🏆 ¡Defendiste tu cinturón ante ${rival.nombre}! Bolsa: ${fmt$(bolsa)}.`, 'bueno'); }
-          else if (titulo) { l.campeon = true; l.ranking = 1; log(`🏆 ¡ERES CAMPEÓN MUNDIAL! Venciste a ${rival.nombre}. Bolsa: ${fmt$(bolsa)}.`, 'raro'); Estado.darLogro('campeon'); }
+          else if (titulo) { l.campeon = true; l.ranking = 1; log(`🏆 ¡ERES CAMPEÓN MUNDIAL! Venciste a ${rival.nombre}. Bolsa: ${fmt$(bolsa)}.`, 'raro'); Estado.darLogro('campeon'); Efectos.celebrar('🏆', '¡Campeón mundial!', `<p>Levantas el cinturón frente a 20.000 personas.</p><p>Bolsa: <b>${fmt$(bolsa)}</b></p>`); Noticias.emitir(`${p.nombre} ${p.apellido} es el nuevo campeón mundial de MMA.`); }
           else { l.ranking = Math.max(1, l.ranking - R.int(8, 18)); log(`🥊 Venciste a ${rival.nombre}. Subes al puesto #${l.ranking}. Bolsa: ${fmt$(bolsa)}.`, 'bueno'); }
         } else {
           l.p++; p.dinero += Math.round(bolsa * 0.3); mod({ salud: -R.int(4, 10), felicidad: -8 });
@@ -318,7 +318,7 @@ const Carreras = {
     const p = S.p, a = p.esp.astronauta;
     if (R.chance(prob + a.entreno / 500)) {
       a.misiones++; a.entreno = 30; mod({ fama: 12 + famaExtra, felicidad: 15 });
-      log(`🌍 ¡Misión espacial completada! ${texto}`, 'raro'); Estado.darLogro('astronauta');
+      log(`🌍 ¡Misión espacial completada! ${texto}`, 'raro'); Estado.darLogro('astronauta'); Efectos.celebrar('🌍', '¡Misión cumplida!', `<p>${texto}</p><p>Viste la Tierra desde el espacio.</p>`); Noticias.emitir(`La misión espacial con ${p.nombre} ${p.apellido} regresa con éxito.`);
       if (a.nivel < 3 && a.misiones >= a.nivel) { a.nivel++; log(`Ascendiste a <b>${NIV_ASTRO[a.nivel]}</b>.`, 'bueno'); }
     } else if (R.chance(0.25)) {
       Vida.morir('un accidente durante una misión espacial');
@@ -345,7 +345,7 @@ const Carreras = {
     if (!usar('publicar', 4)) return;
     const p = S.p, r = p.esp.redes; r.posts++;
     const base = Math.max(15, r.seguidores * 0.07);
-    const f = { selfie: p.st.apariencia / 50, humor: (p.st.felicidad + p.st.inteligencia) / 100, tutorial: p.st.inteligencia / 55, polemica: 1 }[tipo];
+    const f = { selfie: p.st.apariencia / 50, humor: (p.st.felicidad + p.st.inteligencia) / 100, tutorial: p.st.inteligencia / 55, polemica: 1 }[tipo] * (Rasgos.tiene('artista') ? 1.3 : 1); Rasgos.pista('artista');
     let g = Math.round(base * f * R.float(0.4, 1.6));
     if (tipo === 'polemica') {
       if (R.chance(0.5)) { g *= 4; mod({ fama: 3, karma: -3 }); log('🔥 Tu publicación polémica se volvió tendencia.', 'raro'); }

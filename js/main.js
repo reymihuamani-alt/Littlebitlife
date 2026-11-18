@@ -23,6 +23,8 @@ const Inicio = {
         <label class="campo">País<select id="i-pais">${Object.keys(PAISES).map(k => `<option ${k === 'Perú' ? 'selected' : ''}>${k}</option>`).join('')}</select></label></div>
         <label class="campo">Origen familiar<select id="i-origen">${ORIGENES.map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select></label>
         <label class="chk" id="i-real-fila"><input type="checkbox" id="i-real"> 👑 Nacer en la familia real</label>
+        ${Legado.tiene('genes') ? `<label class="campo">🧬 Buenos genes (+20)<select id="i-genes">${['felicidad', 'salud', 'inteligencia', 'apariencia'].map(k => `<option value="${k}">${NOMBRE_STAT[k]}</option>`).join('')}</select></label>` : ''}
+        ${Legado.tiene('destino') ? `<label class="campo">🎯 Destino: elige un rasgo<select id="i-rasgo">${Object.entries(RASGOS_VIDA).filter(([, r]) => r.pos !== false).map(([k, r]) => `<option value="${k}">${r.ic} ${r.n}</option>`).join('')}</select></label>` : ''}
       </div>
       <div class="tarjeta"><h3>2. Elige primero tu objetivo</h3><p class="nota" style="margin-top:-4px">Lo más importante de una buena estrategia: ¿qué quieres lograr en esta vida? Tus decisiones serán más fáciles.</p>
         <div class="objetivos">${OBJETIVOS.map(o => `<button class="obj ${o.id === this.sel.objetivo ? 'sel' : ''}" data-obj="${o.id}"><b>${o.ic} ${o.nombre}</b>${o.desc}</button>`).join('')}</div>
@@ -33,6 +35,7 @@ const Inicio = {
       </div>
       <button class="btn ok" id="btn-empezar">👶 Nacer</button>
       <button class="btn sec" id="btn-azar">🎲 Vida completamente aleatoria</button>
+      <button class="btn sec" id="btn-legado-ini">🏛️ Legado: ${Legado.cargar().puntos} puntos · ${Legado.cargar().cintas.length}/${CINTAS.length} cintas</button>
       <button class="btn sec" id="btn-logros-ini">🏆 Logros (${Estado.logros().length}/${LOGROS.length})</button>
       <p class="nota" style="text-align:center;margin-top:16px">Tu partida se guarda automáticamente en este navegador.</p>
     </div>`;
@@ -46,7 +49,7 @@ const Inicio = {
     if ($('#btn-continuar')) $('#btn-continuar').onclick = () => { S = guardada; this.entrarJuego(); };
     $('#btn-empezar').onclick = () => {
       const genero = $('#i-genero').value, paisN = $('#i-pais').value, origen = $('#i-origen').value;
-      Estado.nuevaVida({ nombre: $('#i-nombre').value.trim() || null, apellido: $('#i-apellido').value.trim() || null, genero, pais: paisN, real: $('#i-real').checked, clase: origen === 'azar' ? null : origen, objetivo: this.sel.objetivo, reto: $('#i-reto').value });
+      Estado.nuevaVida({ nombre: $('#i-nombre').value.trim() || null, apellido: $('#i-apellido').value.trim() || null, genero, pais: paisN, real: $('#i-real').checked, clase: origen === 'azar' ? null : origen, objetivo: this.sel.objetivo, reto: $('#i-reto').value, genes: $('#i-genes') ? $('#i-genes').value : null, rasgo: $('#i-rasgo') ? $('#i-rasgo').value : null });
       this.entrarJuego();
     };
     $('#btn-azar').onclick = () => {
@@ -55,12 +58,14 @@ const Inicio = {
       this.entrarJuego();
     };
     $('#btn-logros-ini').onclick = () => Objetivos.panelLogros();
+    $('#btn-legado-ini').onclick = () => { Panel.alCerrar = () => Inicio.mostrar(); Legado.panel(); };
   },
   entrarJuego() {
     $('#inicio').classList.add('oculto'); $('#inicio').dataset.modo = '';
     $('#app').classList.remove('oculto');
     Modal.cola = []; Modal.activo = false; $('#modal-fondo').classList.add('oculto');
     Estado.guardar();
+    Efectos.reiniciar();
     actualizar();
   },
 };
@@ -75,6 +80,8 @@ const Menu = {
         { sec: 'Tu vida' },
         { ic: ob.ic, t: `Objetivo: ${ob.nombre}`, s: `${ob.desc} · ${Objetivos.pista()}`, der: p.objCumplido ? '✅' : '', fn: () => this.cambiarObjetivo() },
         re.id !== 'ninguno' ? { ic: re.ic, t: `Reto: ${re.nombre}`, s: re.desc, der: p.retoCumplido ? '✅' : '' } : null,
+        { ic: '🧬', t: 'Tus rasgos', s: `${(p.rasgos || []).filter(x => x.visto).length}/${(p.rasgos || []).length} descubiertos`, fn: () => Rasgos.panel() },
+        { ic: '🏛️', t: 'Legado', s: `${Legado.cargar().puntos} puntos · mejoras para tus próximas vidas`, fn: () => Legado.panel() },
         { ic: '📊', t: 'Estadísticas de la vida', fn: () => this.estadisticas() },
         { ic: '🏆', t: 'Logros', s: `${Estado.logros().length}/${LOGROS.length}`, fn: () => Objetivos.panelLogros() },
         { ic: '📖', t: 'Guía y estrategia', fn: () => this.guia() },

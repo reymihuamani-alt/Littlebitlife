@@ -135,7 +135,8 @@ const Relaciones = {
   invitar(c) {
     const p = S.p;
     const actual = pareja();
-    let prob = 0.45 + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
+    Rasgos.pista('carisma');
+    let prob = 0.45 + (Rasgos.tiene('carisma') ? 0.12 : 0) + (p.st.apariencia - c.apa) / 120 + p.st.fama / 250 + (patrimonio() > 1e6 ? 0.1 : 0) + (p.st.felicidad - 50) / 300;
     if (c.real) prob -= 0.25 - p.st.fama / 300;
     if (R.chance(clamp(prob * 100, 5, 92) / 100)) {
       if (actual) {
@@ -186,6 +187,8 @@ const Relaciones = {
     r.tipo = 'conyuge'; r.prenup = prenup; r.anios = 0;
     p.cont.matrimonios++;
     log(`💒 ¡Te casaste con <b>${r.nombre}</b> (${tipoBoda.toLowerCase()})${prenup ? ', con acuerdo prenupcial' : ''}!`, 'raro');
+    Efectos.celebrar('💒', '¡Recién casad' + gx(p, 'o', 'a') + 's!', `<p>Tú y <b>${r.nombre}</b> se dieron el sí.</p>`);
+    if (p.st.fama >= 40) Noticias.emitir(`Boda del año: ${p.nombre} ${p.apellido} se casó con ${r.nombre}.`);
     mod({ felicidad: 18 });
     Estado.darLogro('casado');
     if (r.real) Realeza.casarConRealeza(r);
@@ -247,6 +250,7 @@ const Relaciones = {
         h.nombre = ($('#m-txt').value || '').trim() || h.nombre;
         p.rel.push(h); p.cont.hijos++;
         log(adoptado ? `🧸 Adoptaste a <b>${esc(h.nombre)}</b> (${edad} años).` : `👶 ¡Nació tu hij${gx(h, 'o', 'a')} <b>${esc(h.nombre)}</b>!`, 'raro');
+        Efectos.vibrar([30, 40, 70]); Efectos.confeti();
         mod({ felicidad: 15, estres: 6 });
         Estado.darLogro('padre');
         if (p.esp.realeza) Realeza.nacimientoHeredero(h);
@@ -292,7 +296,7 @@ const Relaciones = {
       if (r.tipo === 'hermano' && r.edad === 0) { log(`👶 ¡Nació tu herman${gx(r, 'o', 'a')} <b>${r.nombre}</b>!`, 'bueno'); continue; }
       if (r.edad < 0) continue;
       r.anios = (r.anios || 0) + 1;
-      if (!p.usos['tiempo' + r.id] && !p.usos['conv' + r.id]) r.cercania = clamp(r.cercania - R.int(0, 4));
+      if (!p.usos['tiempo' + r.id] && !p.usos['conv' + r.id] && !Rasgos.tiene('empatico')) r.cercania = clamp(r.cercania - R.int(0, 4));
       if (r.edad === 18 && ['hijo', 'hermano', 'nieto'].includes(r.tipo)) { r.profesion = R.pick(PROFESIONES_NPC); r.dinero = Math.round(R.int(500, 8000) * eco()); }
       if (r.edad >= 18 && r.profesion && r.profesion !== 'Desempleado') r.dinero += Math.round(R.int(500, 6000) * eco() * (r.real ? 50 : 1));
       if (r.tipo === 'hijo' && r.edad === 18) log(`🎓 ${r.nombre} cumplió 18 y se independizó.`);

@@ -105,14 +105,16 @@ const Educacion = {
       opciones: [...new Set(opciones)].map(o => ({ t: String(o).replace('.', ','), fn: () => this.resolverAdmision(carrera, tipo, o === correcta) })),
     });
   },
-  resolverAdmision(carrera, tipo, acerto) {
+  resolverAdmision(carrera, tipo, acerto, listo) {
+    if (!listo) return Efectos.suspenso('📋 Publicando la lista de ingresantes…', () => this.resolverAdmision(carrera, tipo, acerto, true));
     const p = S.p, dif = CARRERAS[carrera].dif;
     const umbral = tipo === 'publica' ? dif - 10 : dif - 40;
-    let prob = 0.5 + (p.st.inteligencia - umbral) / 40 + (acerto ? 0.2 : -0.15) + (p.edu.notas - 60) / 200;
+    let prob = 0.5 + (p.st.inteligencia - umbral) / 40 + (acerto ? 0.2 : -0.15) + (p.edu.notas - 60) / 200 + (Rasgos.tiene('genio') ? 0.12 : 0);
     prob = Math.min(0.97, Math.max(0.03, prob));
     if (R.chance(prob)) {
+      Efectos.vibrar([30, 40, 60]); Efectos.confeti();
       Modal.mostrar({
-        ic: '🎉', titulo: '¡Ingresaste!', texto: `<p>Fuiste admitid${gx(p, 'o', 'a')} en ${carrera} (${tipo === 'publica' ? 'universidad pública' : 'universidad privada'}). ${acerto ? 'Tu examen fue excelente.' : ''}</p><p>¿Cómo pagarás los estudios? (${fmt$(this.costoUni(tipo))} al año)</p>`,
+        ic: '🎉', titulo: '¡Ingresaste!', clase: 'celebra', texto: `<p>Fuiste admitid${gx(p, 'o', 'a')} en ${carrera} (${tipo === 'publica' ? 'universidad pública' : 'universidad privada'}). ${acerto ? 'Tu examen fue excelente.' : ''}</p><p>¿Cómo pagarás los estudios? (${fmt$(this.costoUni(tipo))} al año)</p>`,
         opciones: this.opcionesPago(carrera, tipo),
       });
     } else {
@@ -172,6 +174,7 @@ const Educacion = {
     e.enCurso = null;
     if (c.tipo === 'universidad') {
       log(`🎓 ¡Te graduaste de <b>${c.nombre}</b>${honores ? ' con honores (cum laude)' : ''}!`, 'bueno');
+      Efectos.celebrar('🎓', '¡Te graduaste!', `<p>Ahora tienes el título de <b>${c.nombre}</b>${honores ? ' con honores' : ''}.</p>`);
       Estado.darLogro('graduado'); if (honores) Estado.darLogro('honores');
     } else {
       log(`📜 ¡Completaste: <b>${POSGRADOS[c.tipo].nombre}</b>${c.tipo !== 'aviacion' && c.tipo !== 'residencia' ? ' en ' + c.nombre : ''}!`, 'bueno');
@@ -255,7 +258,7 @@ const Educacion = {
   estudiar() {
     if (!usar('estudiar', 3)) return;
     const p = S.p;
-    mod({ inteligencia: R.int(1, 3), felicidad: -1, estres: 2 });
+    mod({ inteligencia: R.int(1, 3) + (Rasgos.tiene('genio') ? 2 : 0), felicidad: -1, estres: 2 }); Rasgos.pista('genio');
     if (p.edu.enCurso) p.edu.notasU = clamp((p.edu.notasU ?? 60) + R.int(5, 11)); else p.edu.notas = clamp(p.edu.notas + R.int(5, 11));
     log('Estudiaste duro.');
     toast('📖 +inteligencia, +notas');

@@ -26,6 +26,12 @@ La partida y los logros se guardan automáticamente en el navegador.
 | **Realeza** | Línea de sucesión, coronación, popularidad, abdicación, casarse con la realeza, abolición de la monarquía. |
 | **Vida real** | Recesiones y auges, inflación, terremotos, pandemias, estafas, asaltos, accidentes, crisis de la mediana edad, sistema de salud público vs. privado, emigración con visas. |
 | **Legado** | Cintas al morir, logros persistentes, continuar como uno de tus hijos (generaciones y dinastías). |
+| **Sensación** | Números flotantes en cada cambio, destellos en las barras, vibración, pantallas de suspenso ("El jurado delibera…", "Contando los votos…") y celebraciones con confeti. |
+| **Rasgos ocultos** | 16 talentos y defectos de nacimiento (mente prodigiosa, carisma, sangre fría, salud frágil…) que descubres al crecer o al hacer cosas relacionadas. Algunos se heredan. |
+| **Historias encadenadas** | Tus decisiones vuelven años después: la billetera que devolviste, el amigo que no te pagó, un némesis del colegio que te sigue toda la vida, tu primer amor, tu mentor, tus hijos… |
+| **Noticiero** | Titulares del mundo, chismes sobre ti cuando eres famoso y "Última hora" que interrumpe tu año. |
+| **Asesino en serie** | Un asesino aterroriza tu ciudad: víctimas en las noticias, pistas, sospechosos y la posibilidad de desenmascararlo. O vive tu propia **doble vida** de justiciero con código: los medios te ponen apodo, las redes se dividen, un detective toca tu puerta… |
+| **Legado** | Al morir ganas puntos según tus cintas (las nuevas valen más), objetivo y reto. Colecciona 25 cintas y compra mejoras permanentes: don de nacimiento, buenos genes, autoconocimiento, fondo familiar, destino y segunda oportunidad. |
 | **Modo Dios** | Edita estadísticas, dinero y antecedentes (desactiva los logros de esa vida). |
 
 ## Estructura
@@ -37,6 +43,12 @@ js/datos.js         Países, carreras, trabajos, objetivos, bienes, enfermedades
 js/ui.js            Render, paneles, modales
 js/estado.js        Creación de vidas y guardado
 js/vida.js          El paso de los años, muerte y generaciones
+js/efectos.js       Números flotantes, suspenso, confeti
+js/legado.js        Puntos, colección de cintas y mejoras entre vidas
+js/rasgos.js        Talentos y defectos ocultos
+js/historias.js     Decisiones que regresan años después
+js/noticias.js      Noticiero
+js/asesino.js       El caso del asesino de la ciudad y la doble vida
 js/*.js             Un módulo por sistema (educación, trabajo, carreras, cine,
                     política, finanzas, relaciones, salud, crimen, realeza,
                     eventos, objetivos, actividades, minijuegos)
