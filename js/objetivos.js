@@ -12,7 +12,7 @@ const Objetivos = {
       case 'ceo': return (t && t.id === 'ejecutivo' && t.nivel === 4) || p.negocios.some(n => n.valor >= 1e8);
       case 'presidente': return p.cont.cargos.includes('presidente');
       case 'astronauta': return !!(e.astronauta && e.astronauta.misiones > 0);
-      case 'supermodelo': return !!(e.modelo && e.modelo.nivel === 4);
+      case 'supermodelo': return !!(e.modelo && e.modelo.nivel >= 4);
       case 'director': return !!(e.director && e.director.estatuillas > 0);
       case 'realeza': return !!p.cont.reino;
       case 'capo': return !!(e.org && e.org.rango === 5);
@@ -47,7 +47,7 @@ const Objetivos = {
       case 'ceo': return p.edad < 18 ? 'Estudia Administración o Economía' : p.trabajo && p.trabajo.id === 'ejecutivo' ? `Puesto: ${Trabajo.tituloActual()}` : 'Carrera ejecutiva o empresa de $100 M';
       case 'presidente': return p.cont.cargos.length ? `Cargos: ${p.cont.cargos.map(c => CARGOS[c].n).join(', ')}` : p.edad < 21 ? 'Prepárate: inteligencia y fama' : 'Empieza como concejal';
       case 'astronauta': return e.astronauta ? `${NIV_ASTRO[e.astronauta.nivel]}` : 'STEM + posgrado + salud 70';
-      case 'supermodelo': return e.modelo ? `${e.modelo.nivelN}` : 'Apariencia alta y una agencia';
+      case 'supermodelo': return e.modelo ? `${NIV_MOD[e.modelo.nivel]} · prestigio ${e.modelo.prestigio}/${UMB_MOD[4]}` : 'Apariencia alta y una agencia';
       case 'director': return e.director ? `${e.director.peliculas.length} películas, habilidad ${e.director.habilidad}` : 'Estudia Cine o funda una productora';
       case 'realeza': return e.realeza ? e.realeza.titulo : 'Gala de la alta sociedad';
       case 'capo': return e.org ? `${RANGOS_ORG[e.org.rango]} · respeto ${e.org.respeto}` : 'Actividades → Crimen';
@@ -99,6 +99,7 @@ const Objetivos = {
     if ((e.director && e.director.estatuillas) || (e.actor && e.actor.nivel >= 4)) add('estrella');
     if (e.luchador && (e.luchador.campeon || e.luchador.g >= 15)) add('atleta');
     if (e.astronauta && e.astronauta.misiones) add('astronauta');
+    if (e.modelo && e.modelo.nivel >= 4) add('supermodelo');
     if (p.negocios.some(n => n.valor >= 5e6)) add('empresario');
     if (c.tesoros || (p.coleccion || []).some(x => x.tasado && !x.falso && x.valor >= 1e6)) add('coleccionista');
     if (c.parejas >= 8) add('casanova');

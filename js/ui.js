@@ -79,7 +79,7 @@ function ocupacionTexto() {
   if (p.trabajo) return Trabajo.tituloActual();
   if (p.medioTiempo) return p.medioTiempo.titulo + ' (medio tiempo)';
   const esp = [];
-  if (e.modelo) esp.push(e.modelo.nivelN);
+  if (e.modelo) esp.push(NIV_MOD[e.modelo.nivel] || 'Modelo');
   if (e.actor) esp.push('Actor');
   if (e.director) esp.push('Director de cine');
   if (e.luchador) esp.push('Luchador MMA');

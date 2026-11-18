@@ -23,6 +23,7 @@ const CINTAS = [
   { id: 'aventurero', ic: '🧳', n: 'Aventurero', d: 'Recorriste el mundo.' },
   { id: 'estrella', ic: '🎬', n: 'Estrella de cine', d: 'Tu nombre brilló en la pantalla.' },
   { id: 'atleta', ic: '🥊', n: 'Campeón', d: 'Fuiste el mejor en lo tuyo.' },
+  { id: 'supermodelo', ic: '📸', n: 'Supermodelo', d: 'Tu cara estuvo en vallas de todo el mundo.' },
   { id: 'astronauta', ic: '🚀', n: 'Explorador', d: 'Viste la Tierra desde el espacio.' },
   { id: 'empresario', ic: '🏢', n: 'Empresario', d: 'Construiste empresas.' },
   { id: 'coleccionista', ic: '🏺', n: 'Coleccionista', d: 'Encontraste tesoros que otros no vieron.' },

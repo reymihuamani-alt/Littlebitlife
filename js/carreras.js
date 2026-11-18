@@ -3,9 +3,6 @@
    CARRERAS ESPECIALES: modelaje, actuación, MMA,
    astronauta, redes sociales
    ========================================================= */
-const NIV_MODELO = ['Modelo de catálogo', 'Modelo comercial', 'Modelo de pasarela', 'Modelo internacional', 'Supermodelo'];
-const UMB_MODELO = [0, 4, 10, 20, 34];
-const PAGO_MODELO = [2500, 9000, 35000, 140000, 650000];
 const NIV_ACTOR = ['Extra', 'Actor de reparto', 'Actor secundario', 'Protagonista', 'Estrella internacional'];
 const UMB_ACTOR = [0, 3, 8, 16, 28];
 const PAGO_ACTOR = [1500, 12000, 60000, 400000, 4000000];
@@ -34,7 +31,7 @@ const Carreras = {
   resumenItems() {
     const p = S.p, e = p.esp, its = [];
     if (e.realeza) its.push({ ic: '👑', t: e.realeza.titulo || 'Familia real', s: `Popularidad ${e.realeza.popularidad}%`, fn: () => Realeza.panel(), cls: 'destacado' });
-    if (p.edad >= 16) its.push({ ic: '📸', t: 'Modelaje', s: e.modelo ? `${e.modelo.nivelN} · prestigio ${e.modelo.prestigio}` : 'Firmar con una agencia', fn: () => this.panelModelo(), cls: e.modelo ? 'destacado' : '' });
+    if (p.edad >= 16) its.push({ ic: '📸', t: 'Modelaje', s: e.modelo ? `${NIV_MOD[e.modelo.nivel]} · prestigio ${e.modelo.prestigio}` : 'Buscar agencia o esperar a un cazatalentos', fn: () => this.panelModelo(), cls: e.modelo ? 'destacado' : '' });
     if (p.edad >= 8) its.push({ ic: '🎭', t: 'Actuación', s: e.actor ? `${NIV_ACTOR[e.actor.nivel]} · ${e.actor.papeles} papeles` : 'Buscar un agente', fn: () => this.panelActor(), cls: e.actor ? 'destacado' : '' });
     if (p.edad >= 18) its.push({ ic: '🎬', t: 'Dirección de cine', s: e.director ? `${e.director.peliculas.length} películas · habilidad ${e.director.habilidad}` : 'Fundar tu productora', fn: () => Cine.panel(), cls: e.director ? 'destacado' : '' });
     if (p.edad >= 18) its.push({ ic: '🥊', t: 'Lucha profesional (MMA)', s: e.luchador ? `Récord ${e.luchador.g}-${e.luchador.p} · ranking #${e.luchador.ranking}${e.luchador.campeon ? ' · 🏆 Campeón' : ''}` : 'Entrar a un gimnasio de MMA', fn: () => this.panelLucha(), cls: e.luchador ? 'destacado' : '' });
@@ -50,12 +47,7 @@ const Carreras = {
     let ingreso = 0;
     if (p.carcel) return 0;
     // Modelo
-    if (e.modelo) {
-      const m = e.modelo;
-      if (!p.usos.casting) m.prestigio = Math.max(0, m.prestigio - 2);
-      ingreso += Math.round(PAGO_MODELO[m.nivel] * 0.5);
-      if (p.st.apariencia < 40 || (p.edad > 38 && R.chance(0.25))) { log('📸 Tu agencia de modelos decidió no renovarte el contrato.', 'malo'); e.modelo = null; }
-    }
+    ingreso += Modelaje.anual();
     // Actor
     if (e.actor) {
       const a = e.actor;
@@ -96,71 +88,7 @@ const Carreras = {
   },
 
   /* ---------- MODELAJE ---------- */
-  panelModelo() {
-    Panel.abrir('Modelaje', () => {
-      const p = S.p, m = p.esp.modelo;
-      if (!m) return [
-        { info: 'Para modelar necesitas buena <b>apariencia</b> (idealmente 70%+), salud y constancia. Las agencias aceptan entre 16 y 35 años.' },
-        { ic: '✍️', t: 'Firmar con una agencia de modelos', s: `Tu apariencia: ${p.st.apariencia}%`, fn: () => {
-          if (!usar('agenciaM', 1)) return;
-          if (p.edad > 35) return aviso('Rechazado', '<p>"Lo sentimos, buscamos perfiles más jóvenes."</p>', '📸');
-          if (R.chance(clamp((p.st.apariencia - 45) * 2.2, 3, 95) / 100)) { p.esp.modelo = { nivel: 0, nivelN: NIV_MODELO[0], prestigio: 0, campanias: 0 }; log('📸 ¡Firmaste con una agencia de modelos!', 'bueno'); mod({ felicidad: 8 }); }
-          else { log('Una agencia de modelos te rechazó.', 'malo'); aviso('Rechazado', '<p>"No eres lo que buscamos ahora mismo."</p><p class="nota">Mejora tu apariencia (gimnasio, dieta, estética) y vuelve el próximo año.</p>', '😕'); }
-        } },
-      ];
-      const sig = UMB_MODELO[m.nivel + 1];
-      return [
-        { kv: [['Nivel', m.nivelN], ['Prestigio', `${m.prestigio}${sig ? ' / ' + sig : ''}`], ['Campañas', m.campanias], ['Pago por campaña', '~' + fmt$(PAGO_MODELO[m.nivel])]] },
-        { info: 'En cada casting lee el brief con atención: elige la <b>actitud</b>, la <b>pose</b> y el <b>estilo</b> que pide el cliente. Cuantos más aciertes, más probable que te elijan.' },
-        { ic: '📷', t: 'Ir a un casting', s: `${usosRestantes('casting', 3)} restantes este año`, fn: () => this.casting() },
-        { ic: '🥗', t: 'Cuidar la figura', s: '+apariencia, +salud', fn: () => { if (!usar('figura', 1)) return; mod({ apariencia: R.int(1, 3), salud: 2, felicidad: -1 }); log('Seguiste una rutina estricta de dieta y entrenamiento.'); } },
-        { ic: '🚪', t: 'Dejar el modelaje', cls: 'peligro', fn: () => { p.esp.modelo = null; log('Dejaste el modelaje.'); } },
-      ];
-    });
-  },
-  casting() {
-    if (!usar('casting', 3)) return;
-    const p = S.p, m = p.esp.modelo;
-    const obj = { actitud: R.int(1, 3), pose: R.int(1, 3), estilo: R.int(1, 3) };
-    const marca = R.pick(MARCAS), prod = R.pick(PRODUCTOS);
-    const w = k => R.pick(RASGOS[k][obj[k]]);
-    const frases = [
-      `Para la campaña de ${prod} de <b>${marca}</b> buscamos una mirada <b>${w('actitud')}</b>, una pose <b>${w('pose')}</b> y un look <b>${w('estilo')}</b>.`,
-      `<b>${marca}</b> lanza su línea de ${prod}. El director quiere una energía <b>${w('actitud')}</b>, movimientos <b>${w('pose')}</b> y un estilismo <b>${w('estilo')}</b>.`,
-    ];
-    Modal.mostrar({
-      ic: '📸', titulo: `Casting: ${marca}`,
-      texto: `<p>${R.pick(frases)}</p>`,
-      html: `<div class="nota">Actitud</div>${htmlSelector('s-act', [[1, 'Suave'], [2, 'Segura'], [3, 'Feroz']], 2)}<div class="nota">Pose</div>${htmlSelector('s-pos', [[1, 'Natural'], [2, 'Elegante'], [3, 'Dramática']], 2)}<div class="nota">Estilo</div>${htmlSelector('s-est', [[1, 'Clásico'], [2, 'Moderno'], [3, 'Vanguardista']], 2)}`,
-      alAbrir: activarSelectores,
-      opciones: [{ t: '📷 ¡Posar!', cls: 'ok', fn: () => {
-        const a = +leerSelector('s-act'), b = +leerSelector('s-pos'), c = +leerSelector('s-est');
-        const aciertos = (a === obj.actitud) + (b === obj.pose) + (c === obj.estilo);
-        const prob = 0.12 + aciertos * 0.26 + (p.st.apariencia - 60) / 160 - m.nivel * 0.03 + (Rasgos.tiene('belleza') ? 0.08 : 0); Rasgos.pista('belleza');
-        if (R.chance(clamp(prob * 100, 3, 95) / 100)) {
-          const pago = Math.round(PAGO_MODELO[m.nivel] * R.float(0.7, 1.3) * Math.max(0.6, eco()));
-          p.dinero += pago; m.prestigio += 1 + aciertos; m.campanias++;
-          mod({ fama: m.nivel + 1, felicidad: 5 });
-          log(`📸 ¡Te eligieron para la campaña de ${marca}! Ganaste ${fmt$(pago)}.`, 'bueno');
-          this.subirModelo();
-          aviso('¡Te eligieron!', `<p>Acertaste ${aciertos} de 3 rasgos. Pago: <b>${fmt$(pago)}</b>.</p>`, '🎉');
-        } else {
-          mod({ felicidad: -4 });
-          log(`No te eligieron en el casting de ${marca}.`, 'malo');
-          aviso('No quedaste', `<p>Acertaste ${aciertos} de 3. El cliente quería: actitud <b>${['', 'Suave', 'Segura', 'Feroz'][obj.actitud]}</b>, pose <b>${['', 'Natural', 'Elegante', 'Dramática'][obj.pose]}</b>, estilo <b>${['', 'Clásico', 'Moderno', 'Vanguardista'][obj.estilo]}</b>.</p>`, '😞');
-        }
-      } }],
-    });
-  },
-  subirModelo() {
-    const m = S.p.esp.modelo;
-    while (m.nivel < 4 && m.prestigio >= UMB_MODELO[m.nivel + 1]) {
-      m.nivel++; m.nivelN = NIV_MODELO[m.nivel];
-      log(`🌟 ¡Subiste de nivel! Ahora eres <b>${m.nivelN}</b>.`, 'raro');
-      if (m.nivel === 4) { Estado.darLogro('supermodelo'); mod({ fama: 15 }); Efectos.celebrar('📸', '¡Supermodelo!', '<p>Eres la cara de las marcas más importantes del mundo.</p>'); Noticias.emitir(`${S.p.nombre} ${S.p.apellido} es la nueva supermodelo del momento.`); }
-    }
-  },
-
+  panelModelo() { Modelaje.panel(); },
   /* ---------- ACTUACIÓN ---------- */
   panelActor() {
     Panel.abrir('Actuación', () => {
