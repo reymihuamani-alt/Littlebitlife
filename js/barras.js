@@ -10,8 +10,8 @@ const NIVELES_RIQUEZA = [
 const Barras = {
   /* Los primeros tramos dependen del costo de vida del país; los millones son absolutos */
   umbral(n) { const x = NIVELES_RIQUEZA[n]; return x[3] ? x[2] : x[2] * eco(); },
-  riqueza() {
-    const pt = patrimonio();
+  riqueza() { return this.riquezaDe(patrimonio()); },
+  riquezaDe(pt) {
     if (pt < 0) return { ic: '😟', nombre: 'Endeudado', pct: 0, sig: 'Pobre', faltan: -pt };
     let n = 0;
     while (n < NIVELES_RIQUEZA.length - 1 && pt >= this.umbral(n + 1)) n++;
@@ -25,6 +25,19 @@ const Barras = {
     const r = this.riqueza();
     return { barra: [`${r.ic} Riqueza: ${r.nombre}${r.sig ? ` → ${r.sig} (faltan ${fmt$(r.faltan)})` : ' (la cima)'}`, r.pct, 'linear-gradient(90deg,#16a34a,#eab308)'] };
   },
+  /* Barras de una persona (familiares, parejas, amigos, vecinos) */
+  itemsPersona(r) {
+    const its = [];
+    if (r.edad >= 18 || r.dinero > 0) { const q = this.riquezaDe(r.dinero || 0); its.push({ barra: [`${q.ic} Riqueza: ${q.nombre} (${fmt$(r.dinero || 0)})`, q.pct, 'linear-gradient(90deg,#16a34a,#eab308)'] }); }
+    else its.push({ info: '💰 Riqueza: depende de su familia (es menor de edad).' });
+    if (r.apa !== undefined) its.push({ barra: ['✨ Apariencia', r.apa, colorStat('apariencia', r.apa)] });
+    if (r.int !== undefined) its.push({ barra: ['🧠 Inteligencia', r.int, colorStat('inteligencia', r.int)] });
+    return its;
+  },
+  html(label, pct, color) {
+    return `<div class="stat" style="margin:6px 0"><div class="fila"><span>${label}</span><b>${Math.round(clamp(pct))}%</b></div><div class="barra"><i style="width:${clamp(pct)}%;background:${color}"></i></div></div>`;
+  },
+  icono(dinero) { return this.riquezaDe(dinero || 0).ic; },
   /* Barra genérica "hacia el siguiente nivel" */
   prog(nombre, actual, meta, color = 'var(--pri)', base = 0) {
     if (meta === undefined || meta === null) return null;

@@ -21,7 +21,7 @@ const Relaciones = {
   panel() {
     Panel.abrir('Relaciones', () => {
       const p = S.p, its = [];
-      const grupo = (titulo, lista) => { if (!lista.length) return; its.push({ sec: titulo }); for (const r of lista) its.push({ ic: this.icono(r), t: `${r.nombre} ${r.apellido}${r.titulo ? ' · ' + r.titulo : ''}`, s: `${etiquetaRel(r)} · ${r.vivo ? r.edad + ' años' : 'fallecid' + gx(r, 'o', 'a')}${r.profesion && r.vivo && r.edad >= 18 ? ' · ' + r.profesion : ''}`, der: r.vivo ? `❤️ ${r.cercania}%` : '', fn: r.vivo ? () => this.persona(r) : null }); };
+      const grupo = (titulo, lista) => { if (!lista.length) return; its.push({ sec: titulo }); for (const r of lista) its.push({ ic: this.icono(r), t: `${r.nombre} ${r.apellido}${r.titulo ? ' · ' + r.titulo : ''}`, s: `${etiquetaRel(r)} · ${r.vivo ? r.edad + ' años' : 'fallecid' + gx(r, 'o', 'a')}${r.profesion && r.vivo && r.edad >= 18 ? ' · ' + r.profesion : ''}`, der: r.vivo ? `${r.edad >= 18 ? Barras.icono(r.dinero) + ' ' : ''}❤️ ${r.cercania}%` : '', fn: r.vivo ? () => this.persona(r) : null }); };
       grupo('Padres', p.rel.filter(r => r.tipo === 'padre' || r.tipo === 'madre'));
       grupo('Hermanos', p.rel.filter(r => r.tipo === 'hermano' && r.edad >= 0));
       grupo('Pareja', p.rel.filter(r => (r.tipo === 'pareja' || r.tipo === 'conyuge') && r.vivo));
@@ -49,6 +49,7 @@ const Relaciones = {
       const p = S.p;
       if (!r.vivo) return [{ info: `${r.nombre} falleció.` }];
       const its = [{ kv: [['Relación', etiquetaRel(r)], ['Edad', r.edad], ['Profesión', r.edad < 18 ? 'Estudiante' : r.profesion || '—'], ['Dinero', r.edad >= 18 ? fmt$(r.dinero) : '—']] }, { barra: ['Cercanía', r.cercania] }];
+      its.push(...Barras.itemsPersona(r));
       if (r.tipo === 'amigo' && r.chispa > 0 && this.puedeRomance(r)) its.push({ barra: ['💗 Chispa', r.chispa, '#e8508a'] });
       const a = (ic, t, fn, s, dis) => its.push({ ic, t, s, fn, dis });
       const accion = (clave, max, fn) => () => { if (!usar(clave + r.id, max)) return; fn(); };

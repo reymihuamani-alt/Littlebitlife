@@ -23,6 +23,15 @@ const Barrio = {
     const v = { id: uid(), tipo: tipo || R.pick(Object.keys(TIPOS_VECINO)), genero: g, nombre: nombreAleatorio(g, p.pais), apellido: apellidoAleatorio(p.pais), edad: R.int(22, 80), cercania: R.int(25, 55), vivo: true, pareja: R.chance(0.55), hijos: R.int(0, 3), historia: [] };
     if (v.tipo === 'sabio') v.edad = R.int(70, 90);
     if (v.tipo === 'numerosa') v.hijos = R.int(4, 7);
+    this.fortuna(v);
+    return v;
+  },
+  /* Riqueza, apariencia e inteligencia de un vecino (se calculan si faltan) */
+  fortuna(v) {
+    const e = eco();
+    if (v.dinero === undefined) v.dinero = Math.round((v.tipo === 'rico' ? R.int(600000, 6000000) : v.tipo === 'artista' ? R.int(500, 30000) : v.tipo === 'sabio' ? R.int(20000, 200000) : R.int(3000, 150000)) * (v.tipo === 'rico' ? Math.max(e, 0.6) : e));
+    if (v.apa === undefined) v.apa = statAleatoria();
+    if (v.int === undefined) v.int = clamp(statAleatoria() + (v.tipo === 'sabio' ? 20 : 0));
     return v;
   },
   generar() { return { nombre: R.pick(NOMBRES_BARRIO), vecinos: R.shuffle(Object.keys(TIPOS_VECINO)).slice(0, 6).map(t => this.vecino(t)), novedades: [] }; },
@@ -61,7 +70,7 @@ const Barrio = {
         auto: () => { this.novedad(v, 'se compró un auto nuevo y lo estaciona frente a tu casa.', v.tipo === 'rico' && enLog++ < 2); if (v.tipo === 'rico' && !p.bienes.some(x => x.tipo === 'auto' && x.valor > 40000)) { mod({ felicidad: -2 }); log('😒 No puedes evitar compararte con tus vecinos ricos.', 'gris'); } },
         trabajo: () => this.novedad(v, 'consiguió un trabajo nuevo.', false),
         despido: () => this.novedad(v, 'perdió su trabajo.', false),
-        loteria: () => { this.novedad(v, '¡ganó la lotería! Ahora todos le piden prestado.', true); enLog++; v.tipo = 'rico'; },
+        loteria: () => { this.novedad(v, '¡ganó la lotería! Ahora todos le piden prestado.', true); enLog++; v.tipo = 'rico'; v.dinero = (v.dinero || 0) + Math.round(R.int(1e6, 8e6) * Math.max(eco(), 0.5)); },
         mudanza: () => { this.novedad(v, 'se mudó a otra ciudad.', enLog++ < 2); b.vecinos = b.vecinos.filter(x => x !== v); const n = this.vecino(); b.vecinos.push(n); this.novedad(n, 'se mudó a la casa de al lado.', enLog++ < 2); },
         perro: () => this.novedad(v, 'adoptó un perro que ladra a las 5 a. m.', false),
         remodela: () => this.novedad(v, 'remodeló su casa durante meses. El ruido fue insoportable.', false),
@@ -102,7 +111,7 @@ const Barrio = {
       const p = S.p, b = this.b(), its = [];
       if (b.novedades.length) { its.push({ sec: 'Novedades' }); its.push({ info: b.novedades.slice(0, 6).join('<br>') }); }
       its.push({ sec: 'Tus vecinos' });
-      for (const v of b.vecinos) its.push({ ic: TIPOS_VECINO[v.tipo].ic, t: `${v.nombre} ${v.apellido}`, s: `${TIPOS_VECINO[v.tipo].n} · ${v.edad} años${v.pareja ? ' · casad' + gx(v, 'o', 'a') : ''}${v.hijos ? ` · ${v.hijos} hijo${v.hijos > 1 ? 's' : ''}` : ''}`, der: `❤️ ${v.cercania}%`, fn: () => this.vecinoPanel(v) });
+      for (const v of b.vecinos) its.push({ ic: TIPOS_VECINO[v.tipo].ic, t: `${v.nombre} ${v.apellido}`, s: `${TIPOS_VECINO[v.tipo].n} · ${v.edad} años${v.pareja ? ' · casad' + gx(v, 'o', 'a') : ''}${v.hijos ? ` · ${v.hijos} hijo${v.hijos > 1 ? 's' : ''}` : ''}`, der: `${Barras.icono(this.fortuna(v).dinero)} ❤️ ${v.cercania}%`, fn: () => this.vecinoPanel(v) });
       return its;
     });
   },
@@ -119,6 +128,6 @@ const Barrio = {
     if (v.cercania >= 60 && p.edad >= 12) ops.push(op('🙏 Pedir un favor', () => { if (!usar('favor', 1)) return; const f = R.pick(['te prestó herramientas', 'cuidó tu casa cuando viajaste', 'te recomendó para un trabajo', 'te ayudó con una mudanza']); if (f.includes('trabajo') && p.trabajo) p.trabajo.desempeno = clamp(p.trabajo.desempeno + 5); mod({ felicidad: 2 }); log(`🙏 ${v.nombre} ${f}.`, 'bueno'); }));
     if (v.cercania >= 70 && !p.rel.some(r => r.vecinoId === v.id)) ops.push(op('🤝 Hacerse amigos', () => { const a = Estado.persona({ tipo: 'amigo', genero: v.genero, edad: v.edad, nombre: v.nombre, apellido: v.apellido }); a.cercania = v.cercania; a.vecinoId = v.id; p.rel.push(a); Estado.darLogro('vecino'); log(`🤝 Tu vecin${gx(v, 'o', 'a')} ${v.nombre} ahora es tu amig${gx(v, 'o', 'a')}.`, 'bueno'); }));
     ops.push(op('Cerrar', () => {}));
-    Modal.mostrar({ ic: TIPOS_VECINO[v.tipo].ic, titulo: `${v.nombre} ${v.apellido}`, texto: `<p>${TIPOS_VECINO[v.tipo].n}. Cercanía: ${v.cercania}%</p>${v.historia.length ? `<p class="nota">${v.historia.slice(-4).join('<br>')}</p>` : ''}`, opciones: ops });
+    Modal.mostrar({ ic: TIPOS_VECINO[v.tipo].ic, titulo: `${v.nombre} ${v.apellido}`, texto: `<p>${TIPOS_VECINO[v.tipo].n}.</p>${(() => { this.fortuna(v); const q = Barras.riquezaDe(v.dinero); return Barras.html('❤️ Cercanía', v.cercania, colorStat('x', v.cercania)) + Barras.html(`${q.ic} Riqueza: ${q.nombre} (${fmt$(v.dinero)})`, q.pct, 'linear-gradient(90deg,#16a34a,#eab308)') + Barras.html('✨ Apariencia', v.apa, colorStat('apariencia', v.apa)) + Barras.html('🧠 Inteligencia', v.int, colorStat('inteligencia', v.int)); })()}${v.historia.length ? `<p class="nota">${v.historia.slice(-4).join('<br>')}</p>` : ''}`, opciones: ops });
   },
 };
