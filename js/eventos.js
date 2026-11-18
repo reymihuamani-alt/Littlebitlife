@@ -171,6 +171,17 @@ const EVENTOS = [
     op('No tengo tiempo', () => {}),
   ] }) },
   { id: 'loteriaRegalo', edad: [18, 100], p: 0.015, fn: p => { const m = Math.round(R.int(1000, 25000) * eco()); p.dinero += m; log(`🎁 Ganaste ${fmt$(m)} en un sorteo del supermercado.`, 'bueno'); } },
+  /* ---------- Hallazgos raros ---------- */
+  { id: 'atico', edad: [6, 17], p: 0.02, once: true, fn: p => Modal.mostrar({ ic: '📦', titulo: 'El ático de los abuelos', texto: '<p>Visitando a tus abuelos subes al ático. Entre telarañas hay un baúl viejo cerrado.</p>', opciones: [
+    op('Abrir el baúl', () => { const rz = R.peso([[45, 'comun'], [35, 'raro'], [16, 'epico'], [4, 'legendario']]); Coleccion.encontrar(Coleccion.idDeRareza(rz), 'en el baúl del ático de tus abuelos'); }),
+    op('Mejor no tocar nada', () => {}),
+  ] }) },
+  { id: 'cartasInfancia', edad: [7, 14], p: 0.04, once: true, fn: p => Modal.mostrar({ ic: '🃏', titulo: 'Un sobre de cartas', texto: '<p>Te regalan un sobre de cartas coleccionables. ¡Una brilla de forma rara!</p>', opciones: [
+    op('Guardarla con cuidado en una funda', () => Coleccion.encontrar(R.chance(0.85) ? 'carta' : 'comic', 'en un sobre de cartas coleccionables')),
+    op('Cambiarla por dulces en el recreo', () => { mod({ felicidad: 4 }); log('Cambiaste tu carta brillante por dulces. Nunca sabrás cuánto valía.'); }),
+  ] }) },
+  { id: 'remodelacion', edad: [20, 90], p: 0.02, once: true, cond: () => S.p.bienes.some(b => b.tipo === 'casa'), fn: p => { log('🔨 Remodelando tu casa, los albañiles encontraron algo detrás de una pared.', 'raro'); const rz = R.peso([[40, 'comun'], [35, 'raro'], [20, 'epico'], [5, 'legendario']]); Coleccion.encontrar(Coleccion.idDeRareza(rz), 'escondido detrás de una pared de tu casa'); } },
+  { id: 'playa', edad: [8, 80], p: 0.006, fn: p => { if (R.chance(0.15)) Coleccion.encontrar('meteorito', 'en la playa: una piedra negra muy pesada'); else Coleccion.encontrar(R.pick(['moneda', 'reloj']), 'enterrado en la arena de la playa'); } },
   { id: 'peleaPareja', edad: [16, 90], p: 0.05, cond: () => pareja(), fn: p => { const r = pareja(); Modal.mostrar({ ic: '💢', titulo: 'Discusión de pareja', texto: `<p>${r.nombre} está molest${gx(r, 'o', 'a')} porque sientes que no le dedicas tiempo.</p>`, opciones: [
     op('Pedir perdón y planear algo especial', () => { r.cercania = clamp(r.cercania + 6); }),
     op('Defender mi punto de vista con calma', () => { r.cercania = clamp(r.cercania + R.int(-4, 4)); }),

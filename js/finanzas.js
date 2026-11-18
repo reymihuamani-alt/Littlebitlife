@@ -9,7 +9,7 @@ const INVERSIONES = {
   bonos:   { n: 'Bonos del gobierno', ic: '🏦', m: 0.035, sd: 0.03, desc: 'Seguro y aburrido.' },
   cripto:  { n: 'Criptomonedas', ic: '🪙', m: 0.18, sd: 0.85, desc: 'Montaña rusa. Puede multiplicarse… o desaparecer.' },
 };
-const MANTENIMIENTO = { casa: 0.01, auto: 0.04, lujo: 0.03 };
+const MANTENIMIENTO = { casa: 0.01, auto: 0.04, lujo: 0.03, terreno: 0.002 };
 
 const Finanzas = {
   impuesto(ingreso) {
@@ -40,6 +40,7 @@ const Finanzas = {
     g *= { austero: 0.65, normal: 1, lujoso: 2.8 }[p.estilo];
     g += hijos().filter(h => h.edad < 18).length * 3500 * e;
     g += p.mascotas.filter(m => m.vivo).length * 500 * e;
+    if (p.objetos && p.objetos.seguro) g += 1800 * e;
     return Math.round(g);
   },
 
@@ -85,11 +86,14 @@ const Finanzas = {
     for (const b of p.bienes) {
       let r;
       if (b.tipo === 'casa') r = R.normal(0.035, 0.05) - (S.eco.estado === 'recesion' ? 0.09 : 0);
-      else if (b.tipo === 'auto') r = -R.float(0.1, 0.18);
+      else if (b.tipo === 'terreno') r = R.normal(0.05, 0.07) - (S.eco.estado === 'recesion' ? 0.06 : 0);
+      else if (b.tipo === 'auto' && !b.aprecia) r = -R.float(0.1, 0.18);
       else r = b.aprecia ? R.normal(0.06, 0.15) : -0.07;
       b.valor = Math.max(100, Math.round(b.valor * (1 + r)));
       p.dinero -= Math.round(b.valor * (MANTENIMIENTO[b.tipo] || 0.02) * (b.n === 'Yate' ? 3 : b.n === 'Jet privado' ? 2.5 : 1));
-      if (b.alquilada) { const a = Math.round(b.valor * 0.045); p.dinero += a; }
+      if (b.alquilada) { const a = Math.round(b.valor * (b.renta || 0.045)); p.dinero += a; }
+      if (b.robado && R.chance(0.1)) { p.bienes = p.bienes.filter(x => x !== b); log(`🚓 La policía identificó tu ${b.n} como robado y lo confiscó.`, 'malo'); if (R.chance(0.4)) Crimen.arrestar('receptación de bienes robados', [1, 3]); }
+      if (b.n === 'Club de fútbol') { const t = R.pick(['campeón de liga', 'subcampeón', 'de mitad de tabla', 'casi descendido']); mod({ fama: t === 'campeón de liga' ? 6 : 1, felicidad: t === 'campeón de liga' ? 10 : t === 'casi descendido' ? -6 : 0 }); log(`⚽ Tu club terminó la temporada ${t}.`, t === 'campeón de liga' ? 'raro' : ''); if (t === 'campeón de liga') Noticias.emitir(`¡El club de ${p.nombre} ${p.apellido} es campeón de liga!`); }
     }
     // Saldo negativo
     if (p.dinero < 0 && p.edad >= 18) {
@@ -125,7 +129,10 @@ const Finanzas = {
         its.push({ sec: 'Comprar' });
         its.push({ ic: '🏠', t: 'Bienes raíces', s: 'Casas, departamentos, mansiones', fn: () => this.mercado('casa') });
         its.push({ ic: '🚗', t: 'Vehículos', fn: () => this.mercado('auto') });
-        its.push({ ic: '💎', t: 'Lujos', s: 'Arte, yates, jets', fn: () => this.mercado('lujo') });
+        its.push({ ic: '🌱', t: 'Terrenos', s: 'Se revalorizan y casi no cuestan mantener', fn: () => this.mercado('terreno') });
+        its.push({ ic: '💎', t: 'Lujos', s: 'Arte, joyas, caballos, yates, jets, clubes', fn: () => this.mercado('lujo') });
+        its.push({ ic: '🛍️', t: 'Tienda', s: 'Tecnología, ropa, seguro médico, detector de metales…', fn: () => Tienda.panel() });
+        its.push({ ic: '🕳️', t: 'Mercado negro', s: 'Barato, ilegal y arriesgado', cls: 'peligro', fn: () => MercadoNegro.panel() });
       }
       if (p.bienes.length) {
         its.push({ sec: 'Mis bienes' });
@@ -142,6 +149,7 @@ const Finanzas = {
         its.push({ ic: '🏦', t: 'Pedir un préstamo personal', s: '15% anual a 5 años', dis: p.quiebra > S.anio ? 'Tu historial de quiebra te impide pedir crédito.' : false, fn: () => this.prestamo() });
         if (patrimonio() < 0) its.push({ ic: '⚖️', t: 'Declararse en quiebra', cls: 'peligro', s: 'Borra deudas, pierdes casi todo', fn: () => this.quiebra() });
         its.push({ sec: 'Otros' });
+        its.push({ ic: '🏺', t: 'Tu colección', s: (p.coleccion || []).length ? `${p.coleccion.length} artículos raros` : 'Busca tesoros en bazares y playas', fn: () => Coleccion.panel(), cls: (p.coleccion || []).length ? 'destacado' : '' });
         its.push({ ic: '🎁', t: 'Donar a una causa', s: `Donado en tu vida: ${fmt$(p.cont.donado)}`, fn: () => this.donar() });
       }
       return its;
@@ -167,15 +175,15 @@ const Finanzas = {
     const p = S.p;
     if (!p.mercado || p.mercado.anio !== S.anio) p.mercado = { anio: S.anio };
     if (!p.mercado[tipo]) {
-      const base = { casa: TIPOS_CASA, auto: TIPOS_AUTO, lujo: TIPOS_LUJO }[tipo];
+      const base = { casa: TIPOS_CASA, auto: TIPOS_AUTO, lujo: TIPOS_LUJO, terreno: TIPOS_TERRENO }[tipo];
       p.mercado[tipo] = base.flatMap(t => [0, 1].slice(0, tipo === 'casa' ? 2 : 1).map(() => {
         const factor = t.base >= 1e6 ? Math.max(0.6, eco()) : tipo === 'auto' ? Math.max(0.7, eco()) : eco();
         const estado = tipo === 'casa' ? R.pick(['Excelente estado', 'Buen estado', 'Para remodelar']) : '';
         const m = estado === 'Para remodelar' ? 0.75 : estado === 'Excelente estado' ? 1.12 : 1;
-        return { id: uid(), tipo, n: t.n, ic: t.ic, aprecia: t.aprecia, estado, valor: Math.round(t.base * factor * R.float(0.82, 1.22) * m) };
+        return { id: uid(), tipo, n: t.n, ic: t.ic, aprecia: t.aprecia, renta: t.renta, estado, valor: Math.round(t.base * factor * R.float(0.82, 1.22) * m) };
       }));
     }
-    Panel.abrir({ casa: 'Bienes raíces', auto: 'Concesionario', lujo: 'Artículos de lujo' }[tipo], () => [
+    Panel.abrir({ casa: 'Bienes raíces', auto: 'Concesionario', lujo: 'Artículos de lujo', terreno: 'Terrenos' }[tipo], () => [
       { info: tipo === 'casa' ? 'Puedes pagar al contado o con hipoteca (20% de inicial, 25 años al 7%). Las casas suelen revalorizarse; los autos pierden valor cada año.' : `Tienes ${fmt$(p.dinero)}.` },
       ...p.mercado[tipo].map(o => ({ ic: o.ic, t: o.n, s: `${fmt$(o.valor)}${o.estado ? ' · ' + o.estado : ''}`, fn: () => this.comprar(o) })),
     ]);
@@ -202,6 +210,8 @@ const Finanzas = {
     p.mercado[o.tipo] = p.mercado[o.tipo].filter(x => x.id !== o.id);
     mod({ felicidad: o.valor > 1e6 ? 10 : 5 });
     log(`🔑 Compraste: <b>${o.n}</b> por ${fmt$(o.valor)}${hipoteca ? ' (con hipoteca)' : ''}.`, 'bueno');
+    if (o.n === 'Club de fútbol') { mod({ fama: 15 }); Noticias.emitir(`${p.nombre} ${p.apellido} compra un club de fútbol por ${fmt$(o.valor)}.`); }
+    if (o.valor >= 1e6) Efectos.celebrar(o.ic, '¡Es tuyo!', `<p>Compraste <b>${o.n}</b> por ${fmt$(o.valor)}.</p>`);
     if (o.tipo === 'casa' && p.vivienda !== 'propia') Modal.mostrar({ ic: '🏠', titulo: '¿Te mudas?', texto: '<p>¿Quieres vivir en tu nueva propiedad?</p>', opciones: [{ t: 'Sí, me mudo', cls: 'ok', fn: () => { p.vivienda = 'propia'; p.casaId = b.id; } }, { t: 'No por ahora' }] });
     Panel.atras();
   },
@@ -209,8 +219,10 @@ const Finanzas = {
     const p = S.p, ops = [];
     const deuda = p.deudas.find(d => d.bienId === b.id);
     ops.push({ t: `💰 Vender (~${fmt$(b.valor)}${deuda ? `, se cancela la hipoteca de ${fmt$(deuda.saldo)}` : ''})`, fn: () => this.venderBien(b, R.float(0.92, 1.05)) });
-    if (b.tipo === 'casa' && p.casaId !== b.id) ops.push({ t: b.alquilada ? '🔑 Dejar de alquilarla' : `🏘️ Ponerla en alquiler (~${fmt$(b.valor * 0.045)}/año)`, fn: () => { b.alquilada = !b.alquilada; log(b.alquilada ? `Pusiste en alquiler tu ${b.n}.` : `Dejaste de alquilar tu ${b.n}.`); } });
+    if (b.tipo === 'casa' && p.casaId !== b.id) ops.push({ t: b.alquilada ? '🔑 Dejar de alquilarla' : `🏘️ Ponerla en alquiler (~${fmt$(b.valor * (b.renta || 0.045))}/año)`, fn: () => { b.alquilada = !b.alquilada; log(b.alquilada ? `Pusiste en alquiler tu ${b.n}.` : `Dejaste de alquilar tu ${b.n}.`); } });
     if (b.tipo === 'casa') ops.push({ t: `🔨 Remodelar (${fmt$(b.valor * 0.1)}, sube su valor)`, dis: p.dinero < b.valor * 0.1, fn: () => { if (!usar('remodelar_' + b.id, 1)) return; p.dinero -= Math.round(b.valor * 0.1); b.valor = Math.round(b.valor * R.float(1.08, 1.2)); log(`Remodelaste tu ${b.n}.`); } });
+    if (b.n === 'Caballo de carreras') ops.push({ t: '🏇 Inscribirlo en una carrera', fn: () => { if (!usar('carrera' + b.id, 1)) return; Efectos.suspenso('🏇 ¡Arrancan!', () => { const x = Math.random(); if (x < 0.25) { const g = Math.round(R.int(50000, 2000000) * Math.max(eco(), 0.5)); p.dinero += g; b.valor = Math.round(b.valor * 1.3); mod({ felicidad: 10, fama: 2 }); log(`🏆 ¡Tu caballo ganó la carrera! Premio: ${fmt$(g)}.`, 'raro'); Efectos.celebrar('🏇', '¡Ganó tu caballo!', `<p>Premio: <b>${fmt$(g)}</b>. Su valor subió.</p>`); } else if (x < 0.04 + 0.25) { b.valor = Math.round(b.valor * 0.4); log('Tu caballo se lesionó en la carrera. Perdió mucho valor.', 'malo'); } else log('Tu caballo no ganó esta vez.'); }); } });
+    if (b.tipo === 'terreno') ops.push({ t: '⛏️ Excavar para construir', fn: () => { if (!usar('excavar' + b.id, 1)) return; p.dinero -= Math.round(2000 * eco()); if (R.chance(0.04)) Coleccion.encontrar(R.pick(['fosil', 'huaco', 'moneda']), 'excavando tu terreno'); else { b.valor = Math.round(b.valor * 1.05); log(`Preparaste tu ${b.n.toLowerCase()} para construir.`); } } });
     if (b.tipo === 'auto') ops.push({ t: '🛣️ Dar un paseo', fn: () => { if (!usar('paseo', 1)) return; mod({ felicidad: 4 }); if (!p.licencia && R.chance(0.3)) { log('La policía te detuvo por manejar sin licencia. Multa.', 'malo'); p.dinero -= Math.round(500 * eco()); } else if (R.chance(0.04)) { Salud.accidente(); } else log(`Saliste a pasear en tu ${b.n}.`); } });
     ops.push({ t: 'Cancelar' });
     Modal.mostrar({ ic: b.ic, titulo: b.n, texto: `<p>Valor actual: <b>${fmt$(b.valor)}</b> (compra: ${fmt$(b.compra)})</p>`, opciones: ops });

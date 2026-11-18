@@ -150,26 +150,46 @@ const TIPOS_CASA = [
   { n:'Minidepartamento', base:60000, ic:'🏢' },
   { n:'Departamento de 2 habitaciones', base:140000, ic:'🏬' },
   { n:'Casa familiar', base:260000, ic:'🏠' },
+  { n:'Cabaña en la montaña', base:180000, ic:'🛖' },
   { n:'Casa con jardín y piscina', base:550000, ic:'🏡' },
   { n:'Penthouse', base:1500000, ic:'🌆' },
+  { n:'Casa de campo con viñedo', base:1200000, ic:'🍇' },
+  { n:'Edificio de departamentos', base:3500000, ic:'🏢', renta:0.075 },
   { n:'Mansión', base:4500000, ic:'🏰' },
   { n:'Villa frente al mar', base:9000000, ic:'🏖️' },
+  { n:'Castillo europeo', base:25000000, ic:'🏯' },
   { n:'Isla privada', base:45000000, ic:'🏝️' },
 ];
+const TIPOS_TERRENO = [
+  { n:'Terreno agrícola', base:40000, ic:'🌾' },
+  { n:'Lote urbano', base:120000, ic:'📍' },
+  { n:'Hectáreas en la selva', base:300000, ic:'🌳' },
+  { n:'Hectáreas frente al mar', base:900000, ic:'🌊' },
+];
 const TIPOS_AUTO = [
+  { n:'Moto urbana', base:3000, ic:'🛵' },
   { n:'Auto usado económico', base:6000, ic:'🚙' },
+  { n:'Moto de alta gama', base:30000, ic:'🏍️' },
   { n:'Sedán compacto nuevo', base:22000, ic:'🚗' },
   { n:'SUV familiar', base:42000, ic:'🚐' },
   { n:'Camioneta pickup', base:48000, ic:'🛻' },
   { n:'Sedán de lujo', base:95000, ic:'🚘' },
   { n:'Deportivo italiano', base:280000, ic:'🏎️' },
+  { n:'Auto clásico de colección', base:120000, ic:'🚔', aprecia:true },
+  { n:'Limusina', base:200000, ic:'🚖' },
   { n:'Hiperdeportivo', base:2500000, ic:'🏁' },
+  { n:'Helicóptero', base:3000000, ic:'🚁' },
 ];
 const TIPOS_LUJO = [
   { n:'Reloj de alta relojería', base:35000, ic:'⌚' },
+  { n:'Colección de vinos', base:80000, ic:'🍾', aprecia:true },
+  { n:'Joyas de diamantes', base:150000, ic:'💍', aprecia:true },
   { n:'Obra de arte', base:250000, ic:'🖼️', aprecia:true },
+  { n:'Caballo de carreras', base:400000, ic:'🏇' },
   { n:'Yate', base:6000000, ic:'🛥️' },
+  { n:'Submarino privado', base:15000000, ic:'🛟' },
   { n:'Jet privado', base:25000000, ic:'🛩️' },
+  { n:'Club de fútbol', base:250000000, ic:'⚽' },
 ];
 
 /* ---------- Negocios ---------- */
@@ -269,5 +289,8 @@ const LOGROS = [
   { id:'detective',     ic:'🔎', n:'Detective', d:'Desenmascara a un asesino en serie.' },
   { id:'sombra',        ic:'🌑', n:'Doble vida', d:'Cumple tu código por primera vez.' },
   { id:'apodo',         ic:'📺', n:'Te bautizaron', d:'Los medios te ponen un apodo.' },
+  { id:'tesoro',        ic:'🏺', n:'Cazatesoros', d:'Encuentra un artículo legendario.' },
+  { id:'subasta',       ic:'🔨', n:'¡Vendido!', d:'Vende algo por más de $1 M en una subasta.' },
+  { id:'mercadoNegro',  ic:'🕳️', n:'Bajo la mesa', d:'Compra algo en el mercado negro.' },
   { id:'serie',         ic:'🎞️', n:'Basado en hechos reales', d:'Estrenan una serie sobre tu vida.' },
 ];

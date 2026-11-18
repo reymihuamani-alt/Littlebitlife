@@ -123,6 +123,7 @@ function patrimonio() {
   t += p.bienes.reduce((s, b) => s + b.valor, 0);
   t += Object.values(p.inv).reduce((s, v) => s + v, 0);
   t += p.negocios.reduce((s, n) => s + n.valor * (n.participacion ?? 1), 0);
+  t += (p.coleccion || []).reduce((s, c) => s + (c.tasado && !c.falso ? c.valor : 0), 0);
   t -= p.deudas.reduce((s, d) => s + d.saldo, 0);
   return Math.round(t);
 }

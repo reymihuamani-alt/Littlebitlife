@@ -25,6 +25,7 @@ const CINTAS = [
   { id: 'atleta', ic: '🥊', n: 'Campeón', d: 'Fuiste el mejor en lo tuyo.' },
   { id: 'astronauta', ic: '🚀', n: 'Explorador', d: 'Viste la Tierra desde el espacio.' },
   { id: 'empresario', ic: '🏢', n: 'Empresario', d: 'Construiste empresas.' },
+  { id: 'coleccionista', ic: '🏺', n: 'Coleccionista', d: 'Encontraste tesoros que otros no vieron.' },
   { id: 'tragico', ic: '🥀', n: 'Trágico', d: 'Tu vida terminó demasiado pronto.' },
   { id: 'endeudado', ic: '💸', n: 'Endeudado', d: 'Moriste debiendo dinero.' },
   { id: 'melancolico', ic: '🌧️', n: 'Melancólico', d: 'La felicidad te fue esquiva.' },

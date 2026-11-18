@@ -345,7 +345,7 @@ const Carreras = {
     if (!usar('publicar', 4)) return;
     const p = S.p, r = p.esp.redes; r.posts++;
     const base = Math.max(15, r.seguidores * 0.07);
-    const f = { selfie: p.st.apariencia / 50, humor: (p.st.felicidad + p.st.inteligencia) / 100, tutorial: p.st.inteligencia / 55, polemica: 1 }[tipo] * (Rasgos.tiene('artista') ? 1.3 : 1); Rasgos.pista('artista');
+    const f = { selfie: p.st.apariencia / 50, humor: (p.st.felicidad + p.st.inteligencia) / 100, tutorial: p.st.inteligencia / 55, polemica: 1 }[tipo] * (Rasgos.tiene('artista') ? 1.3 : 1) * (p.objetos && p.objetos.telefono ? 1.15 : 1); Rasgos.pista('artista');
     let g = Math.round(base * f * R.float(0.4, 1.6));
     if (tipo === 'polemica') {
       if (R.chance(0.5)) { g *= 4; mod({ fama: 3, karma: -3 }); log('🔥 Tu publicación polémica se volvió tendencia.', 'raro'); }

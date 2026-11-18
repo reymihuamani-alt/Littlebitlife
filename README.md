@@ -20,6 +20,9 @@ La partida y los logros se guardan automáticamente en el navegador.
 | **Trabajo** | 39 profesiones con requisitos reales, entrevistas, desempeño, ascensos, aumentos, horas extra, despidos (también por recesión), medio tiempo para adolescentes, jubilación y pensión. |
 | **Carreras especiales** | Modelaje (castings: interpreta el brief), actuación (audiciones), dirección de cine (guion, presupuesto, elenco, marketing, tendencias, taquilla y la Estatuilla Dorada), política (campaña, debate, mandatos, leyes, corrupción), astronauta (tres pruebas y misiones), MMA (combate por turnos), redes sociales/influencer. |
 | **Dinero** | Impuestos progresivos por país, gastos según estilo de vida y vivienda, hipotecas, préstamos, quiebra, inversiones (índice, acciones, bonos, cripto), bienes raíces (alquilar, remodelar), autos, lujos, donaciones. |
+| **Más compras** | Cabaña, viñedo, edificio de departamentos para alquilar, castillo; terrenos que se revalorizan (y se pueden excavar); motos, auto clásico que sube de valor, limusina, helicóptero; vinos, joyas, caballo de carreras (compite por premios), submarino, club de fútbol. Tienda con objetos que dan efectos cada año: smartphone, laptop, consola, ropa de diseñador, bicicleta, gimnasio en casa, piano, anillo de compromiso, detector de metales y seguro médico privado. |
+| **Mercado negro** | Ofertas que cambian cada año: pasaporte falso, nueva identidad, autos sin papeles, antigüedades dudosas, cuadros "recuperados", relojes réplica, soplos de bolsa, un cachorro de tigre. Hay estafas, falsificaciones y policías encubiertos, y algunas compras traen historias años después. |
+| **Artículos raros** | 17 tesoros en 4 rarezas (del billete con error de impresión al violín de Cremona o el fósil de dinosaurio) que aparecen muy rara vez: mercado de pulgas, detector de metales en la playa, el ático de los abuelos, herencias, remodelaciones, excavaciones. Hay que tasarlos (pueden ser falsos) y venderlos en subasta (con guerras de pujas), a un coleccionista, en una casa de empeño, en el mercado negro… o donarlos a un museo. |
 | **Negocios** | 10 sectores, capital, empleados, calidad, marketing, reinversión, rondas de inversión, salida a bolsa y venta. |
 | **Relaciones** | Padres, hermanos, amigos, citas, galas de alta sociedad, matrimonio (con o sin acuerdo prenupcial), divorcio, hijos, adopción, nietos, mascotas, herencias. |
 | **Crimen** | Delitos menores y mayores, juicios con distintos abogados, prisión (conducta, pandillas, libertad condicional, apelación), fuga en un laberinto y la **organización criminal**: rangos, respeto, calor policial, territorios, producción, sobornos, informantes, redadas y lavado de dinero. |
@@ -49,6 +52,8 @@ js/rasgos.js        Talentos y defectos ocultos
 js/historias.js     Decisiones que regresan años después
 js/noticias.js      Noticiero
 js/asesino.js       El caso del asesino de la ciudad y la doble vida
+js/coleccion.js     Artículos raros, tasación, subastas y la tienda
+js/mercadonegro.js  Mercado negro
 js/*.js             Un módulo por sistema (educación, trabajo, carreras, cine,
                     política, finanzas, relaciones, salud, crimen, realeza,
                     eventos, objetivos, actividades, minijuegos)

@@ -165,7 +165,7 @@ const Relaciones = {
   proponer(r) {
     const p = S.p;
     if (!usar('proponer', 1)) return;
-    const prob = r.cercania / 110 + Math.min(r.anios, 4) * 0.07 - (r.real ? 0.15 : 0);
+    const prob = r.cercania / 110 + Math.min(r.anios, 4) * 0.07 - (r.real ? 0.15 : 0) + (p.objetos && p.objetos.anillo ? 0.12 : 0);
     if (!R.chance(clamp(prob * 100, 5, 95) / 100)) { r.cercania = clamp(r.cercania - 15); mod({ felicidad: -12 }); log(`💔 ${r.nombre} rechazó tu propuesta de matrimonio.`, 'malo'); return aviso('Te dijo que no', '<p>Quizás fue muy pronto…</p>', '💔'); }
     Modal.mostrar({
       ic: '💍', titulo: '¡Dijo que sí!', texto: `<p>${r.nombre} aceptó casarse contigo. ¿Qué tipo de boda quieren?</p>`,
@@ -341,6 +341,8 @@ const Relaciones = {
     log(`🕯️ Tu ${etiquetaRel(r).toLowerCase()} <b>${r.nombre}</b> murió a los ${r.edad} años por ${causa}.`, 'malo');
     if (['padre', 'madre', 'conyuge', 'hijo', 'hermano'].includes(r.tipo)) mod({ felicidad: -R.int(10, 25), estres: 8 });
     if (r.monarca) Realeza.muereMonarca(r);
+    // Reliquia familiar (rarísimo)
+    if (['padre', 'madre'].includes(r.tipo) && R.chance(0.06)) { const rz = R.peso([[55, 'comun'], [30, 'raro'], [12, 'epico'], [3, 'legendario']]); Coleccion.encontrar(Coleccion.idDeRareza(rz), `entre las cosas que dejó ${r.nombre}`); }
     // Herencia
     if (['padre', 'madre', 'conyuge'].includes(r.tipo) && r.dinero > 0) {
       let parte;

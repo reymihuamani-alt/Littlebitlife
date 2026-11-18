@@ -258,7 +258,7 @@ const Educacion = {
   estudiar() {
     if (!usar('estudiar', 3)) return;
     const p = S.p;
-    mod({ inteligencia: R.int(1, 3) + (Rasgos.tiene('genio') ? 2 : 0), felicidad: -1, estres: 2 }); Rasgos.pista('genio');
+    mod({ inteligencia: R.int(1, 3) + (Rasgos.tiene('genio') ? 2 : 0) + (p.objetos && p.objetos.laptop ? 1 : 0), felicidad: -1, estres: 2 }); Rasgos.pista('genio');
     if (p.edu.enCurso) p.edu.notasU = clamp((p.edu.notasU ?? 60) + R.int(5, 11)); else p.edu.notas = clamp(p.edu.notas + R.int(5, 11));
     log('Estudiaste duro.');
     toast('📖 +inteligencia, +notas');

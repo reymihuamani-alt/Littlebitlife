@@ -34,6 +34,7 @@ const Actividades = {
       a('🥗', 'Seguir una dieta saludable', '+salud, +apariencia', () => { if (!usar('dieta', 1)) return; mod({ salud: 3, apariencia: 1, felicidad: -1 }); log('Seguiste una dieta saludable todo el año.'); }, e < 13 ? 'Desde los 13 años.' : false);
       a('🩺', 'Salud y médicos', 'Enfermedades, terapia, cirugía, rehabilitación', () => Salud.panel());
       its.push({ sec: 'Ocio' });
+      if (e >= 12) a('🧺', 'Mercado de pulgas', 'Cachivaches… y muy de vez en cuando, un tesoro', () => Coleccion.bazar());
       a('🎬', 'Ir al cine', '+felicidad', () => { if (!usar('cine', 2)) return; p.dinero -= e >= 18 ? Math.round(10 * eco()) : 0; mod({ felicidad: 3 }); log(`Fuiste a ver una película de ${R.pick(GENEROS_CINE).toLowerCase()}.`); });
       if (e >= 18) {
         a('✈️', 'Vacaciones', '−estrés, +felicidad', () => this.vacaciones());
@@ -87,9 +88,14 @@ const Actividades = {
     const costo = Math.round(3000 * Math.max(eco(), PAISES[destino].eco));
     if (p.dinero < costo) return aviso('Sin fondos', `<p>Necesitas ${fmt$(costo)} para mudarte.</p>`, '🧳');
     if (!usar('emigrar', 1)) return;
+    if (p.pasaporteFalso && !conTrabajo) {
+      if (R.chance(0.15)) { p.dinero -= costo; log('🛂 En migraciones detectaron tu pasaporte falso.', 'malo'); p.pasaporteFalso = false; return Crimen.arrestar('uso de documentos falsos', [1, 4]); }
+      p._sinVisa = true; log('🛂 Pasaste migraciones con tu pasaporte falso sin problemas.', 'malo');
+    }
     const dificil = PAISES[destino].eco > 0.6 && PAISES[p.pais].eco < 0.6;
-    const prob = conTrabajo ? 0.95 : dificil ? 0.3 + (nivelEdu() >= 3 ? 0.35 : 0) + (patrimonio() > 5e5 ? 0.3 : 0) - (p.antecedentes ? 0.25 : 0) : 0.8;
+    const prob = conTrabajo || p._sinVisa ? 0.99 : dificil ? 0.3 + (nivelEdu() >= 3 ? 0.35 : 0) + (patrimonio() > 5e5 ? 0.3 : 0) - (p.antecedentes ? 0.25 : 0) : 0.8;
     if (!R.chance(clamp(prob * 100, 5, 98) / 100)) { log(`🛂 Te negaron la visa para ${destino}.`, 'malo'); return aviso('Visa denegada', '<p>El consulado rechazó tu solicitud. Un título universitario o más patrimonio ayudan.</p>', '🛂'); }
+    p._sinVisa = false;
     p.dinero -= costo;
     const ecoAntes = eco();
     if (!conTrabajo && p.trabajo) Trabajo.dejar(`Dejaste tu empleo para emigrar.`);

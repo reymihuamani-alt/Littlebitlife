@@ -92,6 +92,7 @@ const Salud = {
   resolver(en, prob, costo, privado) {
     const p = S.p;
     if (!usar('tratar' + en.n, 1)) return;
+    if (costo && privado && p.objetos && p.objetos.seguro) costo *= 0.1;
     if (costo) { const c = Math.round(costo * Math.max(eco(), 0.35)); if (p.edad < 18) this.cobrar(costo, privado); else p.dinero -= c; }
     if (R.chance(prob)) { p.enf = p.enf.filter(x => x !== en); mod({ salud: 8, felicidad: 5 }); log(`💊 El tratamiento funcionó: superaste ${en.n}.`, 'bueno'); toast('¡Tratamiento exitoso!'); }
     else { mod({ felicidad: -3 }); log(`El tratamiento para ${en.n} no funcionó.`, 'malo'); toast('El tratamiento no funcionó.'); }
