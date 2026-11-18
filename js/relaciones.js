@@ -27,6 +27,7 @@ const Relaciones = {
       grupo('Pareja', p.rel.filter(r => (r.tipo === 'pareja' || r.tipo === 'conyuge') && r.vivo));
       grupo('Hijos', p.rel.filter(r => r.tipo === 'hijo'));
       grupo('Nietos', p.rel.filter(r => r.tipo === 'nieto'));
+      grupo('Familia extendida', p.rel.filter(r => r.tipo === 'tio'));
       grupo('Amigos', p.rel.filter(r => r.tipo === 'amigo' && r.vivo));
       grupo('Exparejas', p.rel.filter(r => r.tipo === 'ex' && r.vivo).slice(-6));
       const mas = p.mascotas.filter(m => m.vivo);
@@ -78,6 +79,7 @@ const Relaciones = {
         a('🛋️', 'Terapia de pareja', accion('terapiaP', 1, () => { const c = Math.round(1500 * eco()); p.dinero -= c; r.cercania = clamp(r.cercania + R.int(6, 18)); log('Fueron a terapia de pareja.'); }));
         a('📄', 'Pedir el divorcio', () => this.divorcio(r));
       }
+      if (r.tipo === 'tio') a('🌀', 'Acompañarlo en una aventura', () => AventuraTio.ir(r), 'Nunca sabes cómo termina');
       if (r.tipo === 'ex') a('🔁', 'Intentar volver', accion('volver', 1, () => { if (!pareja() && R.chance(r.cercania / 200)) { r.tipo = 'pareja'; r.anios = 0; log(`Volviste con ${r.nombre}.`, 'bueno'); } else log(`${r.nombre} no quiere volver contigo.`, 'malo'); }));
       a('😠', 'Discutir', accion('discutir', 1, () => { r.cercania = clamp(r.cercania - R.int(5, 15)); mod({ estres: -2 }); log(`Discutiste con ${r.nombre}.`, 'malo'); }));
       a('🤬', 'Insultar', accion('insultar', 1, () => { r.cercania = clamp(r.cercania - R.int(10, 25)); mod({ karma: -2 }); log(`Insultaste a ${r.nombre}.`, 'malo'); }));

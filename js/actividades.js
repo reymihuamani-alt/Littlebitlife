@@ -54,6 +54,7 @@ const Actividades = {
         a('✍️', 'Cambiar de nombre', '', () => this.cambiarNombre());
       }
       a('🐾', 'Adoptar una mascota', '', () => Relaciones.adoptarMascota());
+      if (Absurdo.activo() && e >= 14) { its.push({ sec: '🛸 Lo absurdo' }); a('🧪', 'Experimento en el garaje', p.st.inteligencia >= 60 ? `Ciencia loca (${fmt$(500 * Math.max(eco(), 0.4))})` : 'Necesitas inteligencia 60%', () => Multiverso.experimento(), p.st.inteligencia < 60 ? 'Necesitas inteligencia de 60%.' : false); }
       if (e >= 10) { its.push({ sec: 'El lado oscuro' }); a('🦹', 'Crimen', 'Delitos, crimen organizado', () => Crimen.panel()); }
       return its;
     });

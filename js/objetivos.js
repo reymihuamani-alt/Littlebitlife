@@ -99,6 +99,7 @@ const Objetivos = {
     if ((e.director && e.director.estatuillas) || (e.actor && e.actor.nivel >= 4)) add('estrella');
     if (e.luchador && (e.luchador.campeon || e.luchador.g >= 15)) add('atleta');
     if (e.astronauta && e.astronauta.misiones) add('astronauta');
+    if (c.saltos) add('viajero');
     if (e.modelo && e.modelo.nivel >= 4) add('supermodelo');
     if (p.negocios.some(n => n.valor >= 5e6)) add('empresario');
     if (c.tesoros || (p.coleccion || []).some(x => x.tasado && !x.falso && x.valor >= 1e6)) add('coleccionista');

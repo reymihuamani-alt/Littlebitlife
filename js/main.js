@@ -88,6 +88,8 @@ const Menu = {
         { ic: '📖', t: 'Guía y estrategia', fn: () => this.guia() },
         { sec: 'Opciones' },
         { ic: '⚡', t: 'Modo Dios', s: p.dios ? 'Activo (los logros están desactivados)' : 'Edita tus estadísticas. Desactiva los logros de esta vida.', fn: () => this.dios() },
+        { ic: '🛸', t: `Modo absurdo: ${Absurdo.activo() ? 'activado' : 'desactivado'}`, s: 'Ciencia loca, abducciones, multiverso… o vida 100% realista', fn: () => { Absurdo.alternar(); toast(Absurdo.activo() ? '🛸 Modo absurdo activado' : '🏙️ Vida 100% realista'); } },
+        Legado.tiene('portal') ? { ic: '🌀', t: 'Usar la llave del multiverso', s: p.cont.llaveUsada ? 'Ya la usaste en esta vida' : 'Una vez por vida: abre un portal a otras versiones de ti', dis: p.cont.llaveUsada ? 'Ya la usaste en esta vida.' : p.edad < 16 ? 'Desde los 16 años.' : p.carcel ? 'Estás en prisión.' : false, fn: () => { p.cont.llaveUsada = true; Panel.cerrar(); Multiverso.abrir('Giras la llave en el aire y el espacio se abre como una cortina'); } } : null,
         { ic: '🌓', t: 'Cambiar tema claro / oscuro', fn: () => { const r = document.documentElement; const oscuro = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.dataset.theme = oscuro ? 'light' : 'dark'; try { localStorage.setItem('otravida_tema', r.dataset.theme); } catch (e) {} } },
         { ic: '💾', t: 'Guardar partida', fn: () => { Estado.guardar(); toast('💾 Partida guardada'); } },
         { ic: '🆕', t: 'Nueva vida', cls: 'peligro', fn: () => Modal.mostrar({ ic: '🆕', titulo: '¿Empezar de nuevo?', texto: '<p>Se perderá la vida actual.</p>', opciones: [{ t: 'Sí, nueva vida', cls: 'peligro', fn: () => { Estado.borrar(); Inicio.mostrar(); } }, { t: 'Cancelar' }] }) },

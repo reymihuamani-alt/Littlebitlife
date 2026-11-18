@@ -28,7 +28,7 @@ const Finanzas = {
   cuota(d) { return d.anios <= 1 ? d.saldo * (1 + d.tasa) : d.saldo * d.tasa / (1 - Math.pow(1 + d.tasa, -d.anios)); },
   gastosVida() {
     const p = S.p, e = eco();
-    if (p.carcel) return 0;
+    if (p.carcel || p.monasterio) return 0;
     if (p.edad < 18) return 0;
     let g;
     if (viveConPadres()) g = p.edad < 23 && !p.trabajo ? 0 : 1500 * e;
@@ -159,7 +159,7 @@ const Finanzas = {
   mudarse() {
     const p = S.p, ops = [];
     if (personas('padre', 'madre').length) ops.push({ t: '👪 Vivir con mis padres (barato)', fn: () => { p.vivienda = 'padres'; p.casaId = null; log('Te mudaste con tus padres.'); } });
-    ops.push({ t: `🏢 Alquilar un departamento (~${fmt$(9000 * eco())}/año)`, fn: () => { p.vivienda = 'alquiler'; p.casaId = null; log('Te mudaste a un departamento alquilado.'); Barrio.mudanza(); mod({ felicidad: 3 }); } });
+    ops.push({ t: `🏢 Alquilar un departamento (~${fmt$(9000 * eco())}/año)`, fn: () => { p.vivienda = 'alquiler'; p.casaId = null; p.monasterio = false; log('Te mudaste a un departamento alquilado.'); Barrio.mudanza(); mod({ felicidad: 3 }); } });
     for (const b of p.bienes.filter(b => b.tipo === 'casa')) ops.push({ t: `🏠 Vivir en mi ${b.n}`, fn: () => { p.vivienda = 'propia'; p.casaId = b.id; b.alquilada = false; log(`Te mudaste a tu ${b.n}.`); Barrio.mudanza(); mod({ felicidad: 5 }); } });
     ops.push({ t: 'Cancelar' });
     Modal.mostrar({ ic: '🏡', titulo: 'Mudarse', texto: '<p>¿Dónde quieres vivir?</p>', opciones: ops });

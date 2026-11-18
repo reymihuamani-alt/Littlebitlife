@@ -74,6 +74,7 @@ function ocupacionTexto() {
   const p = S.p, e = p.esp;
   if (!p.vivo) return 'Fallecido';
   if (p.carcel) return `En prisión (${p.carcel.restantes} años restantes)`;
+  if (p.monasterio) return 'Vives en un monasterio';
   if (e.realeza && e.realeza.titulo) return e.realeza.titulo;
   if (e.politica && e.politica.cargo) return CARGOS[e.politica.cargo].n;
   if (p.trabajo) return Trabajo.tituloActual();

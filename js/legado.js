@@ -24,6 +24,7 @@ const CINTAS = [
   { id: 'estrella', ic: '🎬', n: 'Estrella de cine', d: 'Tu nombre brilló en la pantalla.' },
   { id: 'atleta', ic: '🥊', n: 'Campeón', d: 'Fuiste el mejor en lo tuyo.' },
   { id: 'supermodelo', ic: '📸', n: 'Supermodelo', d: 'Tu cara estuvo en vallas de todo el mundo.' },
+  { id: 'viajero', ic: '🌀', n: 'Viajero dimensional', d: 'Saltaste a otra versión de tu vida.' },
   { id: 'astronauta', ic: '🚀', n: 'Explorador', d: 'Viste la Tierra desde el espacio.' },
   { id: 'empresario', ic: '🏢', n: 'Empresario', d: 'Construiste empresas.' },
   { id: 'coleccionista', ic: '🏺', n: 'Coleccionista', d: 'Encontraste tesoros que otros no vieron.' },
@@ -39,6 +40,7 @@ const MEJORAS = [
   { id: 'vision', ic: '🔮', n: 'Autoconocimiento', d: 'Ves todos tus rasgos ocultos desde que naces.', costo: 200 },
   { id: 'fondo', ic: '🏦', n: 'Fondo familiar', d: 'A los 18 recibes un fondo fiduciario del legado familiar.', costo: 250 },
   { id: 'destino', ic: '🎯', n: 'Destino', d: 'Eliges uno de tus rasgos al nacer.', costo: 350 },
+  { id: 'portal', ic: '🌀', n: 'Llave del multiverso', d: 'Una vez por vida, desde el menú, abres un portal a otras versiones de tu vida.', costo: 300 },
   { id: 'segunda', ic: '💫', n: 'Segunda oportunidad', d: 'Una vez por vida sobrevives a una muerte segura.', costo: 450 },
 ];
 
