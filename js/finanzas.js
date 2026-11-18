@@ -120,6 +120,7 @@ const Finanzas = {
       const totInv = Object.values(p.inv).reduce((s, v) => s + v, 0);
       const totDeu = p.deudas.reduce((s, d) => s + d.saldo, 0);
       its.push({ kv: [['💵 Efectivo', fmt$(p.dinero)], ['📊 Inversiones', fmt$(totInv)], ['🏠 Bienes', fmt$(p.bienes.reduce((s, b) => s + b.valor, 0))], ['🏢 Empresas', fmt$(p.negocios.reduce((s, n) => s + n.valor * n.participacion, 0))], ['💳 Deudas', fmt$(totDeu)], ['🧾 Patrimonio neto', `<b>${fmt$(patrimonio())}</b>`]] });
+      its.push(Barras.itemRiqueza());
       if (p.esp.org && p.esp.org.dineroSucio > 0) its.push({ info: `🕶️ Dinero sin lavar: <b>${fmt$(p.esp.org.dineroSucio)}</b> (no cuenta en tu patrimonio).` });
       if (p.edad < 18) { its.push({ info: 'Eres menor de edad: tus padres administran el hogar. Puedes pedirles dinero desde Relaciones.' }); if (p.negocios.length) { its.push({ sec: 'Empresas familiares' }, { info: 'Un administrador gestiona tus empresas hasta que cumplas 18. Los dividendos llegan a tu cuenta.' }); for (const n of p.negocios) its.push({ ic: n.ic, t: n.nombre, s: `${n.sectorN} · valor ${fmt$(n.valor)}` }); } }
       if (p.carcel) { its.push({ info: 'Estás en prisión: no puedes hacer operaciones.' }); return its; }

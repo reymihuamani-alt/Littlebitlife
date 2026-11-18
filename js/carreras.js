@@ -106,6 +106,7 @@ const Carreras = {
       const sig = UMB_ACTOR[a.nivel + 1];
       return [
         { kv: [['Nivel', NIV_ACTOR[a.nivel]], ['Prestigio', `${a.prestigio}${sig ? ' / ' + sig : ''}`], ['Papeles', a.papeles], ['Pago por papel', '~' + fmt$(PAGO_ACTOR[a.nivel])]] },
+        a.nivel < 4 ? Barras.prog(`🌟 Hacia ${NIV_ACTOR[a.nivel + 1]}`, a.prestigio, UMB_ACTOR[a.nivel + 1], 'var(--fama)', UMB_ACTOR[a.nivel]) : null,
         { info: 'En la audición, elige la interpretación que mejor encaje con la escena.' },
         { ic: '🎬', t: 'Ir a una audición', s: `${usosRestantes('audicion', 3)} restantes este año`, fn: () => this.audicion() },
         { ic: '🎓', t: 'Tomar clases de actuación', fn: () => { if (!usar('clasesA', 1)) return; a.prestigio++; mod({ felicidad: 2 }); log('Tomaste clases intensivas de actuación.'); } },
@@ -141,6 +142,7 @@ const Carreras = {
       ];
       return [
         { kv: [['Récord', `${l.g} victorias · ${l.p} derrotas`], ['Ranking mundial', l.campeon ? '🏆 Campeón' : '#' + l.ranking], ['Defensas del título', l.defensas]] },
+        l.campeon ? null : { barra: [`🏆 Camino al título (puesto #${l.ranking}; con #3 peleas por el cinturón)`, clamp((100 - l.ranking) / 97 * 100), '#d4a106'] },
         { barra: ['Entrenamiento', l.entreno] },
         { ic: '🏋️', t: 'Entrenar', s: `${usosRestantes('entrenarL', 3)} restantes`, fn: () => { if (!usar('entrenarL', 3)) return; l.entreno = clamp(l.entreno + R.int(5, 10)); mod({ salud: 1, estres: 2, apariencia: 1 }); log('Entrenaste duro en el gimnasio.'); toast('🏋️ +entrenamiento'); } },
         { ic: '🥊', t: l.campeon ? 'Defender el título' : l.ranking <= 3 ? '🏆 Pelear por el título mundial' : 'Pelear la siguiente pelea', s: `${usosRestantes('pelearL', 2)} peleas restantes`, fn: () => this.pelearMMA() },
@@ -195,6 +197,7 @@ const Carreras = {
       }
       return [
         { kv: [['Rango', NIV_ASTRO[a.nivel]], ['Misiones', a.misiones]] },
+        a.nivel < 3 ? Barras.prog(`🚀 Misiones para ${NIV_ASTRO[a.nivel + 1]}`, a.misiones, Math.max(1, a.nivel), 'var(--info)') : null,
         { barra: ['Entrenamiento', a.entreno] },
         { ic: '🧑‍🚀', t: 'Entrenamiento en simulador', fn: () => { if (!usar('simulador', 2)) return; a.entreno = clamp(a.entreno + R.int(5, 10)); mod({ estres: 3, inteligencia: 1 }); log('Pasaste horas en el simulador de vuelo espacial.'); } },
         { ic: '🏃', t: 'Preparación física', fn: () => { if (!usar('fisicaA', 1)) return; mod({ salud: 3 }); log('Completaste tu preparación física.'); } },
@@ -260,6 +263,7 @@ const Carreras = {
       if (!r) return [{ ic: '📱', t: 'Crear una cuenta', s: 'Empieza tu camino de influencer', fn: () => { p.esp.redes = { seguidores: R.int(20, 150), posts: 0 }; log('📱 Creaste tu cuenta en redes sociales.'); } }];
       return [
         { kv: [['Seguidores', fmtNum(r.seguidores)], ['Publicaciones', r.posts], ['Monetización', r.seguidores >= 10000 ? `~${fmt$(r.seguidores * 0.012)}/año` : 'Desde 10 mil seguidores']] },
+        Barras.prog('📱 Próximo hito de seguidores', r.seguidores, Barras.siguienteHito(r.seguidores, [1000, 10000, 100000, 1e6, 1e7, 1e8]), 'var(--fama)'),
         { ic: '🤳', t: 'Publicar una selfie', s: 'Depende de tu apariencia', fn: () => this.publicar('selfie') },
         { ic: '😂', t: 'Publicar un video de humor', s: 'Depende de tu ingenio', fn: () => this.publicar('humor') },
         { ic: '🧑‍🏫', t: 'Publicar un tutorial educativo', s: 'Depende de tu inteligencia', fn: () => this.publicar('tutorial') },

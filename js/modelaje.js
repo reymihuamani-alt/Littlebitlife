@@ -61,6 +61,7 @@ const Modelaje = {
       const its = [
         { kv: [['Nivel', `📸 ${NIV_MOD[m.nivel]}`], ['Agencia', `${ag.ic} ${ag.n} (comisión ${Math.round(ag.com * 100)}%)`], ['Perfil', PERFILES_MOD[m.perfil]], ['Prestigio', `${m.prestigio}${sig ? ' / ' + sig : ''}`], ['Trayectoria', `${m.campanias} campañas · ${m.desfiles} desfiles · ${m.portadas} portadas`]] },
         faltaIcono.length ? { info: `👑 Para ser <b>Ícono de la moda</b> además necesitas: ${faltaIcono.join(' y ')}.` } : null,
+        m.nivel < 5 ? Barras.prog(`🌟 Hacia ${NIV_MOD[m.nivel + 1]}`, m.prestigio, UMB_MOD[m.nivel + 1], 'var(--fama)', UMB_MOD[m.nivel]) : null,
         { barra: ['📷 Calidad de tu book', m.book, 'var(--info)'] },
         { barra: ['🏛️ Reputación en la industria', m.rep, 'var(--fama)'] },
       ];

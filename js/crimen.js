@@ -186,6 +186,7 @@ const Crimen = {
       const sig = RESPETO_RANGO[o.rango + 1];
       const its = [
         { kv: [['Organización', o.nombre], ['Rango', RANGOS_ORG[o.rango]], ['Respeto', `${o.respeto}${sig ? ' / ' + sig : ''}`], ['Territorios', o.territorios], ['Miembros', o.miembros], ['Producción', o.operacion ? `Nivel ${o.operacion}` : 'Sin producción propia'], ['Dinero sucio', fmt$(o.dineroSucio)], ['Sobornos a la policía', o.sobornos ? 'Activos' : 'No']] },
+        o.rango < 5 ? Barras.prog(`🕶️ Respeto para ${RANGOS_ORG[o.rango + 1]}`, o.respeto, RESPETO_RANGO[o.rango + 1], 'var(--txt2)', RESPETO_RANGO[o.rango]) : null,
         { barra: ['🚨 Calor policial', o.calor, o.calor > 60 ? 'var(--mal)' : o.calor > 30 ? 'var(--med)' : 'var(--ok)'] },
         { barra: ['🛡️ Seguridad', o.seguridad, 'var(--info)'] },
       ];

@@ -137,6 +137,7 @@ const Trabajo = {
       its.push({ sec: 'Trabajo' });
       its.push({ kv: [['Puesto', `${d.ic} ${d.niveles[t.nivel]}`], ['Sueldo', fmt$(this.salario()) + '/año'], ['Años en el puesto', t.anios], ['Siguiente puesto', d.niveles[t.nivel + 1] || '— (cima)']] });
       its.push({ barra: ['Desempeño', t.desempeno] });
+      if (d.niveles[t.nivel + 1]) its.push({ barra: [`📈 Camino al ascenso: ${d.niveles[t.nivel + 1]}`, clamp(Math.min(t.anios, 2) * 25 + Math.max(0, t.desempeno - 30)), 'var(--ok)'] });
       its.push({ ic: '💪', t: 'Trabajar más duro', s: '+desempeño, +estrés', fn: () => { if (!usar('duro', 2)) return; t.desempeno = clamp(t.desempeno + R.int(6, 12)); mod({ estres: 5, felicidad: -1 }); log('Trabajaste más duro que nunca.'); toast('💪 +desempeño'); } });
       its.push({ ic: '⏰', t: 'Hacer horas extra', s: '+dinero, +estrés, −salud', fn: () => { if (!usar('extra', 2)) return; const g = Math.round(this.salario() * 0.06); p.dinero += g; mod({ estres: 7, salud: -2 }); t.desempeno = clamp(t.desempeno + 3); log(`Hiciste horas extra y ganaste ${fmt$(g)}.`); } });
       its.push({ ic: '📈', t: 'Pedir un ascenso', dis: !d.niveles[t.nivel + 1] ? 'Ya estás en la cima.' : false, fn: () => this.pedirAscenso() });

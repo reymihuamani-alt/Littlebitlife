@@ -36,6 +36,7 @@ const Cine = {
       }
       const its = [
         { kv: [['Productora', d.productora], ...(d.legado ? [['Fundada por', `${d.legado.fundador} (${d.legado.peliculas} película${d.legado.peliculas === 1 ? "" : "s"}${d.legado.estatuillas ? ' · ' + '🏆'.repeat(d.legado.estatuillas) : ''})`]] : []), ['Habilidad como director', d.habilidad + '%'], ['Reputación en la industria', d.reputacion + '%'], ['Estatuillas Doradas', '🏆'.repeat(d.estatuillas) || '0']] },
+        { barra: ['🎬 Habilidad como director', d.habilidad, 'var(--fama)'] }, { barra: ['🏛️ Reputación en la industria (financiamiento de estudios)', d.reputacion, 'var(--info)'] },
         { ic: '🎥', t: 'Producir una película', s: `${usosRestantes('pelicula', d.reputacion >= 60 ? 2 : 1)} restantes este año`, fn: () => this.producir() },
         { ic: '📚', t: 'Estudiar a los grandes maestros', s: '+habilidad', fn: () => { if (!usar('maestros', 1)) return; d.habilidad = clamp(d.habilidad + R.int(2, 5)); mod({ inteligencia: 1 }); log('Estudiaste filmografías clásicas para mejorar como director.'); } },
         { ic: '📈', t: 'Ver tendencias del público', fn: () => aviso('Tendencias del año', GENEROS_CINE.map(g => `<p>${g}: <b>${this.tendencia(g)}</b></p>`).join(''), '📊') },

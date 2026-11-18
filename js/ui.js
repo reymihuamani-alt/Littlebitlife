@@ -64,7 +64,8 @@ function render() {
   reg.scrollTop = reg.scrollHeight;
   // stats
   const keys = ['felicidad', 'salud', 'inteligencia', 'apariencia', 'estres', 'fama'];
-  $('#stats').innerHTML = keys.map(k => { const v = p.st[k]; return `<div class="stat" data-k="${k}"><div class="fila"><span>${NOMBRE_STAT[k]}</span><b>${v}%</b></div><div class="barra"><i style="width:${v}%;background:${colorStat(k, v)}"></i></div></div>`; }).join('');
+  const rq = Barras.riqueza();
+  $('#stats').innerHTML = keys.map(k => { const v = p.st[k]; return `<div class="stat" data-k="${k}"><div class="fila"><span>${NOMBRE_STAT[k]}</span><b>${v}%</b></div><div class="barra"><i style="width:${v}%;background:${colorStat(k, v)}"></i></div></div>`; }).join('') + `<div class="stat ancho" data-k="riqueza"><div class="fila"><span>${rq.ic} Riqueza: <b>${rq.nombre}</b></span><b>${rq.sig ? '→ ' + rq.sig : '🏆'}</b></div><div class="barra"><i style="width:${rq.pct}%;background:linear-gradient(90deg,#16a34a,#eab308)"></i></div></div>`;
   $('#nav-ocupacion').textContent = p.carcel ? 'Prisión' : (p.edad < 18 || p.edu.enCurso) && !p.trabajo ? 'Escuela' : 'Trabajo';
   document.querySelector('[data-nav="ocupacion"] span').textContent = p.carcel ? '⛓️' : (p.edad < 18 || p.edu.enCurso) && !p.trabajo ? '🎓' : '💼';
   $('#btn-edad').classList.toggle('muerto', !p.vivo);

@@ -240,6 +240,7 @@ const Educacion = {
       const c = e.enCurso;
       its.push({ info: `<b>${c.tipo === 'universidad' ? c.nombre : POSGRADOS[c.tipo].nombre}</b> — año ${c.anio} de ${c.dur} · ${c.fin === 'beca' ? 'becad' + gx(p, 'o', 'a') : c.fin === 'padres' ? 'pagan tus padres' : c.fin === 'prestamo' ? 'con préstamo' : 'pagas tú'}` });
       its.push({ barra: ['Promedio', e.notasU ?? 60] });
+      its.push(Barras.prog('🎓 Avance de la carrera (años)', c.anio - 1, c.dur, 'var(--info)'));
       its.push({ ic: '📖', t: 'Estudiar más', s: `(${usosRestantes('estudiar', 3)} restantes este año)`, fn: () => this.estudiar() });
       its.push({ ic: '🎉', t: 'Ir a una fiesta universitaria', fn: () => { if (!usar('fiestaU', 2)) return; mod({ felicidad: 7, salud: -2, estres: -6 }); e.notasU = clamp((e.notasU ?? 60) - 5); p.adic.alcohol = clamp(p.adic.alcohol + 3); log('Fuiste a una fiesta universitaria épica.'); if (R.chance(0.25)) Relaciones.nuevoAmigo('en una fiesta universitaria'); } });
       its.push({ ic: '🚪', t: 'Abandonar los estudios', cls: 'peligro', fn: () => Modal.mostrar({ titulo: '¿Abandonar?', texto: '<p>Perderás el progreso, pero tus deudas se quedan.</p>', opciones: [{ t: 'Abandonar', cls: 'peligro', fn: () => { log(`Abandonaste ${c.nombre}.`, 'malo'); e.enCurso = null; } }, { t: 'Seguir estudiando' }] }) });
